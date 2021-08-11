@@ -1,0 +1,31 @@
+{
+  "name": "rollup-plugin-react-scoped-css",
+  "version": "0.1.1",
+  "description": "A rollup plugin designed to allow scoped css to be run in react (Compatible with vite and rollup)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cmseguin/rollup-plugin-react-scoped-css.git"
+  },
+  "author": "cmseguin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cmseguin/rollup-plugin-react-scoped-css/issues"
+  },
+  "homepage": "https://github.com/cmseguin/rollup-plugin-react-scoped-css#readme",
+  "dependencies": {
+    "@rollup/pluginutils": "^4.1.1",
+    "@vue/component-compiler-utils": "^3.2.2",
+    "js-xxhash": "^1.0.4",
+    "rollup": "^2.56.2"
+  },
+  "devDependencies": {
+    "@types/estree": "0.0.50"
+  }
+}

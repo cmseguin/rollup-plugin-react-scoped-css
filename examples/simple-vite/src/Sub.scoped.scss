@@ -1,0 +1,46 @@
+.sub {
+  color: red;
+
+  &__test {
+    margin: 0;
+  }
+
+  h2 {
+    font-weight: 300;
+    font-size: 3rem;
+  }
+}
+
+h2 {
+  font-size: 10rem;
+}
+
+.drawer {
+  width: 400px;
+
+  &__list-item {
+    padding: 0;
+  }
+
+  &__list-item-icon {
+    margin-right: 1rem;
+  }
+
+  &__link {
+    display: flex;
+    width: 300px;
+    padding: 1rem;
+    align-items: center;
+    text-decoration: none;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    font-family: 'Quicksand', 'Roboto', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+
+    &:hover {
+      background-color: #fafafa;
+    }
+  }
+}
