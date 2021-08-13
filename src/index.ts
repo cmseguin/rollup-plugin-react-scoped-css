@@ -2,8 +2,10 @@ import * as path from 'path';
 import { xxHash32 } from 'js-xxhash';
 import { createFilter, FilterPattern } from '@rollup/pluginutils';
 import { compileStyle } from '@vue/component-compiler-utils'
+import { generate } from 'escodegen'
 
 import type { Plugin } from 'rollup'
+import { addHashAttributesToJsxTagsAst } from './ast.utils';
 
 const getFilenameFromPath = (filePath: string) => {
   const parts = filePath.split('/')
@@ -74,16 +76,6 @@ export default function reactScopedCssPlugin(optionsIn:ReactScopedCssPluginOptio
           return url
         }
       },
-      transform(code, id) {
-        if (!filter(id)) {
-          return;
-        }
-
-        if (scopedCssInFileRegex.test(code)) {
-          const importerHash = generateHash(id);
-          return addAttributesToJsx(code, importerHash, options.hashPrefix)
-        }
-      },
       enforce: 'pre'
     },
     {
@@ -91,6 +83,13 @@ export default function reactScopedCssPlugin(optionsIn:ReactScopedCssPluginOptio
       transform(code, id) {
         if (!filter(id)) {
           return;
+        }
+
+        if (scopedCssInFileRegex.test(code)) {
+          const importerHash = generateHash(id);
+          const program = this.parse(code)
+          const newAst = addHashAttributesToJsxTagsAst(program, `data-${options.hashPrefix}-${importerHash}`)
+          return generate(newAst)
         }
 
         if (scopedCssRegex.test(getFilenameFromPath(id))) {
