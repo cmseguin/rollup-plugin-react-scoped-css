@@ -3,14 +3,7 @@ import { xxHash32 } from 'js-xxhash';
 import { createFilter, FilterPattern } from '@rollup/pluginutils';
 import { compileStyle } from '@vue/component-compiler-utils'
 
-<<<<<<< HEAD
-const scopedCssRegex = /\.scoped\.(scss|css|sass)$/
-const scopedCssInFileRegex = /\.scoped\.(scss|css|sass)(\"|\')/
-const jsxRegex = /\.(tsx|jsx)$/
-const cssSelectorRegex = /([^\r\n,{}]+)(,(?=[^}]*{)|\s*{)/g
-=======
 import type { Plugin } from 'rollup'
->>>>>>> 62ba1ee... Added ways to customize some stuff
 
 const getFilenameFromPath = (filePath: string) => {
   const parts = filePath.split('/')
