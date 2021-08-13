@@ -22,10 +22,12 @@
   "dependencies": {
     "@rollup/pluginutils": "^4.1.1",
     "@vue/component-compiler-utils": "^3.2.2",
+    "escodegen": "^2.0.0",
     "js-xxhash": "^1.0.4",
     "rollup": "^2.56.2"
   },
   "devDependencies": {
+    "@types/escodegen": "0.0.7",
     "@types/estree": "0.0.50"
   }
 }
