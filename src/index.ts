@@ -23,20 +23,16 @@ const generateHash = (input: string, seed: number = 0) => {
   return hashNum.toString(16);
 }
 
-const addAttributesToCss = (src: string, fileName: string, hash: string, prefix: string) => {
+const addAttributesToCss = (src: string, fileName: string, hash: string) => {
   const { code } = compileStyle({
     source: src,
     filename: fileName,
-    id: `data-${prefix}-${hash}`,
+    id: hash,
     scoped: true,
     trim: true,
   })
 
   return code
-}
-
-const addAttributesToJsx = (src: string, hash: string, prefix: string) => {
-  return src.replace(/<[^/][^>]*>/g, (tag) => tag.replace(/([^=<])(\/?>)/, (m, ...sm) => `${sm[0]} data-${prefix}-${hash}${sm[1]}`))
 }
 
 export interface ReactScopedCssPluginOptions {
@@ -94,7 +90,7 @@ export default function reactScopedCssPlugin(optionsIn:ReactScopedCssPluginOptio
 
         if (scopedCssRegex.test(getFilenameFromPath(id))) {
           const importerHash = getHashFromPath(id);
-          return addAttributesToCss(code, getFilenameFromPath(id), importerHash, options.hashPrefix)
+          return addAttributesToCss(code, getFilenameFromPath(id), `data-${options.hashPrefix}-${importerHash}`)
         }
       }
     }
