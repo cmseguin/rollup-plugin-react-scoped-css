@@ -6,8 +6,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "prepare": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepare": "npm run build && npm test",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -27,7 +27,11 @@
     "rollup": "^2.56.2"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.15.0",
+    "@babel/preset-typescript": "^7.15.0",
     "@types/escodegen": "0.0.7",
-    "@types/estree": "0.0.50"
+    "@types/estree": "0.0.50",
+    "@types/jest": "^27.0.1",
+    "jest": "^27.0.6"
   }
 }

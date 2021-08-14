@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "prepublish": "exit 1;"
   },
   "dependencies": {
     "react": "^17.0.0",

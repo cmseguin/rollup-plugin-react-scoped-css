@@ -80,6 +80,6 @@ export default {
 ```
 
 ## Contributing
-Anyone is free to open a PR and contribute to this project... I, by no means, am the best, and I am sure someone smarter than add a lot to this project. 
+Anyone is free to open a PR and contribute to this project... I, by no means, am the best, and I am sure someone smarter than me can bring a lot to this project. 
 
 The only rules is: Don't be a dick

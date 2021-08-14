@@ -5,6 +5,16 @@ function isNode(obj: unknown) {
       typeof (obj as any)?.type === 'string'
 }
 
+function isReactCreateElementCallExpression(node: any) {
+  return node?.type === 'CallExpression' && 
+    node?.callee?.object?.name === 'React' &&
+    node?.callee?.property?.name === 'createElement'
+}
+
+function isLiteralCallExpression(node: any) {
+  return node?.arguments?.[0].type === 'Literal'
+}
+
 function traverse(ast: any, callback: Function) {
   for (let key of Object.keys(ast)) {
     if (['end', 'start', 'type'].includes(key)) { continue; }
@@ -23,15 +33,15 @@ function traverse(ast: any, callback: Function) {
   return typeof result !== 'undefined' ? result : ast
 }
 
-export function addHashAttributesToJsxTagsAst(program: any, attr: string) {
-  const newNode = {
+function createAttributeNode(attr: string) {
+  return {
     type: 'Property',
     method: false,
     shorthand: false,
     computed: false,
     key: {
       type: 'Identifier',
-      name: `'${attr}'`
+      name: `"${attr}"`
     },
     value: {
       type: 'Literal',
@@ -40,32 +50,30 @@ export function addHashAttributesToJsxTagsAst(program: any, attr: string) {
     },
     kind: 'init'
   }
-  return traverse(program, (x: any) => {
-    if (
-        x?.type === 'CallExpression' && 
-        x?.callee?.object?.name === 'React' &&
-        x?.callee?.property?.name === 'createElement'
-    ) {
-      const arg = x?.arguments?.[1]
+}
+
+export function addHashAttributesToJsxTagsAst(program: any, attr: string) {
+  return traverse(program, (node: any) => {
+    if (isReactCreateElementCallExpression(node) && isLiteralCallExpression(node)) {
+      const arg = node?.arguments?.[1]
       return {
-        ...x,
-        arguments: x?.arguments.map((v: any, i: number) => {
+        ...node,
+        arguments: node?.arguments.map((v: any, i: number) => {
           if (i === 1) {
               if (v.type === 'ObjectExpression') {
                 return {
                   ...v,
                   properties: [
                     ...arg.properties,
-                    newNode
+                    createAttributeNode(attr)
                   ]
                 }
               } else {
                 return {
                   type: 'ObjectExpression',
-                  properties: [newNode]
+                  properties: [createAttributeNode(attr)]
                 }
               }
-              
             }
             return v
           })
