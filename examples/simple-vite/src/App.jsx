@@ -41,7 +41,9 @@ function App() {
             </a>
           </p>
         </header>
-        <Sub></Sub>
+        <>
+          <Sub></Sub>
+        </>
       </div>
     </>
   )

@@ -32,6 +32,6 @@ function App() {
     target: "_blank",
     rel: "noopener noreferrer",
     "data-v-123456": true
-  }, "Vite Docs"))), React.createElement(Sub, null)));
+  }, "Vite Docs"))), React.createElement(Sub, { "data-v-123456": true })));
 }
 export default App;

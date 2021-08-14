@@ -11,8 +11,8 @@ function isReactCreateElementCallExpression(node: any) {
     node?.callee?.property?.name === 'createElement'
 }
 
-function isLiteralCallExpression(node: any) {
-  return node?.arguments?.[0].type === 'Literal'
+function isFragmentCallExpression(node: any) {
+  return node?.arguments?.[0]?.object?.name === "React" && node?.arguments?.[0]?.property?.name === "Fragment"
 }
 
 function traverse(ast: any, callback: Function) {
@@ -54,7 +54,7 @@ function createAttributeNode(attr: string) {
 
 export function addHashAttributesToJsxTagsAst(program: any, attr: string) {
   return traverse(program, (node: any) => {
-    if (isReactCreateElementCallExpression(node) && isLiteralCallExpression(node)) {
+    if (isReactCreateElementCallExpression(node) && !isFragmentCallExpression(node)) {
       const arg = node?.arguments?.[1]
       return {
         ...node,
