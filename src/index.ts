@@ -36,29 +36,73 @@ const addAttributesToCss = (src: string, fileName: string, hash: string) => {
 }
 
 export interface ReactScopedCssPluginOptions {
+  /**
+   * Which files should be included and parsed by the plugin
+   * Default: undefined
+   */
   include?: FilterPattern
+
+  /**
+   * Which files should be exluded and that should not be parsed by the plugin
+   * Default: undefined
+   */
   exclude?: FilterPattern
+
+  /**
+   * If you want to customize the stylesheet file pattern
+   * if undefined or '' is passed, all files will be evaluated
+   * Default: 'scoped'
+   */
   styleFileSuffix?: string
+
+  /**
+   * If you want to customize the attribute prefix that is added to the jsx elements
+   * Default: 'v'
+   */
   hashPrefix?: string
-  preProcessors?: string[]
+
+  /**
+   * If you want to customize the stylesheet extensions
+   * Default: ['scss', 'css', 'sass', 'less']
+   */
+   styleFileExtensions?: string[]
+
+  /**
+   * If you have jsx in other file extensions
+   * Default: ['jsx', 'tsx']
+   */
+  jsxFileExtensions?: string[]
 }
 
 export interface VitePartialPlugin extends Plugin {
   enforce?: "pre" | "post"
 }
 
-export default function reactScopedCssPlugin(optionsIn:ReactScopedCssPluginOptions = {}): VitePartialPlugin[] {
-  const options = {
-    styleFileSuffix: 'scoped',
+export default function reactScopedCssPlugin(optionsIn: ReactScopedCssPluginOptions = {}): VitePartialPlugin[] {
+  const options: Partial<ReactScopedCssPluginOptions> = {
     hashPrefix: 'v',
-    preProcessors: ['scss', 'css', 'sass', 'less'],
+    styleFileSuffix: 'scoped',
+    styleFileExtensions: ['scss', 'css', 'sass', 'less'],
+    jsxFileExtensions: ['jsx', 'tsx'],
     ...optionsIn
   }
 
+  if (!options.styleFileExtensions || !options.styleFileExtensions.length) {
+    throw new Error('You need to provide at least one style file extension')
+  }
+
+  if (!options.jsxFileExtensions || !options.jsxFileExtensions.length) {
+    throw new Error('You need to provide at least one jsx file extension')
+  }
+
   const filter = createFilter( options.include, options.exclude );
-  const scopedCssRegex = new RegExp(`\.${options.styleFileSuffix}\.(${options.preProcessors.join('|')})$`)
-  const scopedCssInFileRegex = new RegExp(`\.${options.styleFileSuffix}\.(${options.preProcessors.join('|')})(\"|\')`)
-  const jsxRegex = /\.(tsx|jsx)$/
+  const scopedCssRegex = options.styleFileSuffix 
+    ? new RegExp(`\.${options.styleFileSuffix}\.(${options.styleFileExtensions.join('|')})$`)
+    : new RegExp(`\.(${options.styleFileExtensions.join('|')})$`)
+  const scopedCssInFileRegex = options.styleFileSuffix
+    ? new RegExp(`\.${options.styleFileSuffix}\.(${options.styleFileExtensions.join('|')})(\"|\')`)
+    : new RegExp(`\.(${options.styleFileExtensions.join('|')})(\"|\')`)
+  const jsxRegex = new RegExp(`\.(${options.jsxFileExtensions.join('|')})$`)
 
   return [
     {
