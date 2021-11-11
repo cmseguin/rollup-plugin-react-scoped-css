@@ -40,6 +40,7 @@ export interface ReactScopedCssPluginOptions {
   exclude?: FilterPattern
   styleFileSuffix?: string
   hashPrefix?: string
+  preProcessors?: string[]
 }
 
 export interface VitePartialPlugin extends Plugin {
@@ -50,12 +51,13 @@ export default function reactScopedCssPlugin(optionsIn:ReactScopedCssPluginOptio
   const options = {
     styleFileSuffix: 'scoped',
     hashPrefix: 'v',
+    preProcessors: ['scss', 'css', 'sass', 'less'],
     ...optionsIn
   }
 
   const filter = createFilter( options.include, options.exclude );
-  const scopedCssRegex = new RegExp(`\.${options.styleFileSuffix}\.(scss|css|sass)$`)
-  const scopedCssInFileRegex = new RegExp(`\.${options.styleFileSuffix}\.(scss|css|sass)(\"|\')`)
+  const scopedCssRegex = new RegExp(`\.${options.styleFileSuffix}\.(${options.preProcessors.join('|')})$`)
+  const scopedCssInFileRegex = new RegExp(`\.${options.styleFileSuffix}\.(${options.preProcessors.join('|')})(\"|\')`)
   const jsxRegex = /\.(tsx|jsx)$/
 
   return [
