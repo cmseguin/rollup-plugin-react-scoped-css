@@ -6,13 +6,24 @@ function isNode(obj: unknown) {
 }
 
 function isReactCreateElementCallExpression(node: any) {
-  return node?.type === 'CallExpression' && 
+  return ( // with React.createElement
+    node?.type === 'CallExpression' && 
     node?.callee?.object?.name === 'React' &&
     node?.callee?.property?.name === 'createElement'
+  ) || ( // with babel jsx runtime
+    node?.type === 'CallExpression' &&
+    node?.callee?.name === '_jsxDEV'
+  )
 }
 
 function isFragmentCallExpression(node: any) {
-  return node?.arguments?.[0]?.object?.name === "React" && node?.arguments?.[0]?.property?.name === "Fragment"
+  return ( // with React.createElement
+    node?.arguments?.[0]?.object?.name === "React" && 
+    node?.arguments?.[0]?.property?.name === "Fragment"
+  ) || ( // with babel jsx runtime
+    node.arguments?.[0]?.type === "Identifier" &&
+    node.arguments?.[0]?.name === "_Fragment"
+  )
 }
 
 function traverse(ast: any, callback: Function) {
