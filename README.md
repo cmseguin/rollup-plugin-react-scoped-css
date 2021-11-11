@@ -56,6 +56,7 @@ There are a few options available to customize how the plugin works
 
   /**
    * If you want to customize the stylesheet file pattern
+   * if undefined or '' is passed, all files will be evaluated
    * Default: 'scoped'
    */
   styleFileSuffix?: string
@@ -70,12 +71,18 @@ There are a few options available to customize how the plugin works
    * If you want to customize the preprocessors
    * Default: ['scss', 'css', 'sass', 'less']
    */
-  preProcessors?: string[]
+  styleFileExtensions?: string[]
+
+  /**
+   * If you have jsx in other file extensions
+   * Default: ['jsx', 'tsx']
+   */
+  jsxFileExtensions?: string[]
 }
 ```
 
 ### With other rollup plugins
-Since this plugin works in two parts, you might need to expose the first part, then add any styling plugin, and then expose the second part of the plugin. This part is automatically handled with vite thanks to the enforce attribute.
+Since this plugin works in two parts, you might need to expose the first part, then add any other plugin, and then expose the second part of the plugin. This part is automatically handled with vite thanks to the enforce attribute.
 
 ```
 const reactScopedPlugins = reactScopedCssPlugin()
@@ -86,6 +93,4 @@ export default {
 ```
 
 ## Contributing
-Anyone is free to open a PR and contribute to this project... I, by no means, am the best, and I am sure someone smarter than me can bring a lot to this project. 
-
-The only rules is: Don't be a dick
+Anyone is free to open a PR and contribute to this project... just be civilized!
