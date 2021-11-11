@@ -65,6 +65,12 @@ There are a few options available to customize how the plugin works
    * Default: 'v'
    */
   hashPrefix?: string
+
+  /**
+   * If you want to customize the preprocessors
+   * Default: ['scss', 'css', 'sass', 'less']
+   */
+  preProcessors?: string[]
 }
 ```
 
