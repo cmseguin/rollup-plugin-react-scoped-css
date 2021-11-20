@@ -4,5 +4,8 @@ import reactScopedCssPlugin from '../../'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), reactScopedCssPlugin()]
+  plugins: [react(), reactScopedCssPlugin()],
+  build: {
+    minify: false
+  }
 })
