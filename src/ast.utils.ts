@@ -38,7 +38,7 @@ function isElementWithOldJsxTransform(node: any) {
 
 function isElementWithNewJsxTransform(node: any) {
   return node?.type === 'CallExpression' &&
-    ['_jsxDEV', '_jsx'].includes(node?.callee?.name)
+    ['_jsxDEV', '_jsx', '_jsxs'].includes(node?.callee?.name)
 }
 
 function isFragmentWithOldJsxTransform(node: any) {
