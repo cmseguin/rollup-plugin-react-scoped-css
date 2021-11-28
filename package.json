@@ -7,7 +7,6 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "prepare": "npm run build && npm test",
     "test": "jest"
   },
   "repository": {
