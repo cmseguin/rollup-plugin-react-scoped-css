@@ -1,9 +1,9 @@
-name: Pull Request Workflow
+name: Pre Release Workflow
 
 on:
-  push:
-  pull_request:
-    types: [opened]
+  release:
+    types:
+      - prereleased
 
 jobs:
   build:
