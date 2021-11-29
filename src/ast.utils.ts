@@ -1,111 +1,48 @@
-/**
- * Traverses the AST tree and calls callback for each node.
- * -
- * @param ast The ast tree
- * @param callback Callback function to be called for each node
- * @returns 
- */
-function traverse(ast: any, callback: Function) {
-  for (let key of Object.keys(ast)) {
-    if (['end', 'start', 'type'].includes(key)) { continue; }
+import { astIterator } from "./ast-iterator"
+import { astTransformer } from "./ast-transformer"
+import { ClassicJsxParser } from "./parsers/classic-parser"
+import { JsxParser, ParserImplementations } from "./parsers/jsx-parser.model"
+import { NewJsxParser } from "./parsers/new-parser"
 
-    if (Array.isArray(ast[key])) {
-      for (let nodeIndex in ast[key]) {
-        ast[key][nodeIndex] = traverse(ast[key][nodeIndex], callback)
-      }
-    } else if(isNode(ast[key])) {
-      ast[key] = traverse(ast[key], callback)
+declare global {
+  var implementation: null | ParserImplementations
+}
+
+global.implementation = null
+
+const classicParser = new ClassicJsxParser()
+const newParser = new NewJsxParser()
+
+let parser: JsxParser = classicParser;
+
+const findImplementation = (program: any) => {
+  let implementation: ParserImplementations = ParserImplementations.classic;
+  for (let node of astIterator(program)) {
+    if (node.type !== 'ImportDeclaration') {
+      continue;
+    }
+
+    if (node.specifiers.some((n: any) => n.local.name === 'jsxRuntime') || node.source.value === 'react/jsx-runtime') {
+      return ParserImplementations.new
     }
   }
-
-  const result = callback(ast);
-
-  return typeof result !== 'undefined' ? result : ast
-}
-
-function isNode(obj: unknown) {
-  return typeof obj === 'object' && 
-      typeof (obj as any)?.end === 'number' && 
-      typeof (obj as any)?.start === 'number' && 
-      typeof (obj as any)?.type === 'string'
-}
-
-function isElementWithOldJsxTransform(node: any) {
-  return node?.type === 'CallExpression' && 
-    node?.callee?.object?.name === 'React' &&
-    node?.callee?.property?.name === 'createElement'
-}
-
-function isElementWithNewJsxTransform(node: any) {
-  return node?.type === 'CallExpression' &&
-    ['_jsxDEV', '_jsx', '_jsxs'].includes(node?.callee?.name)
-}
-
-function isFragmentWithOldJsxTransform(node: any) {
-  return node?.arguments?.[0]?.object?.name === "React" && 
-    node?.arguments?.[0]?.property?.name === "Fragment"
-}
-
-function isFragmentWithNewJsxTransform(node: any) {
-  return node.arguments?.[0]?.type === "Identifier" &&
-    node.arguments?.[0]?.name === "_Fragment"
-}
-
-function isFragment(node: any) {
-  return isFragmentWithOldJsxTransform(node) ||
-  isFragmentWithNewJsxTransform(node)
-}
-
-function isReactElement(node: any) {
-  return isElementWithOldJsxTransform(node) ||
-  isElementWithNewJsxTransform(node)
-}
-
-function createAttributeNode(attr: string) {
-  return {
-    type: 'Property',
-    method: false,
-    shorthand: false,
-    computed: false,
-    key: {
-      type: 'Identifier',
-      name: `"${attr}"`
-    },
-    value: {
-      type: 'Literal',
-      value: true,
-      raw: "true"
-    },
-    kind: 'init'
-  }
+  return implementation
 }
 
 export function addHashAttributesToJsxTagsAst(program: any, attr: string) {
-  return traverse(program, (node: any) => {
-    if (isReactElement(node) && !isFragment(node)) {
-      const arg = node?.arguments?.[1]
-      return {
-        ...node,
-        arguments: node?.arguments.map((v: any, i: number) => {
-          if (i === 1) {
-              if (v.type === 'ObjectExpression') {
-                return {
-                  ...v,
-                  properties: [
-                    ...arg.properties,
-                    createAttributeNode(attr)
-                  ]
-                }
-              } else {
-                return {
-                  type: 'ObjectExpression',
-                  properties: [createAttributeNode(attr)]
-                }
-              }
-            }
-            return v
-          })
-        }
+
+  // Once in the program, we can determine which parser to use
+  if (global.implementation === null) {
+    global.implementation = findImplementation(program)
+
+    if (global.implementation === ParserImplementations.new) {
+      parser = newParser
+    }
+  }
+
+  return astTransformer(program, (node: any) => {
+    if (parser.isNodeReactElement(node) && !parser.isNodeReactFragment(node)) {
+      return parser.extendNodeWithAttributes(node, attr)
     }
   })
 }
