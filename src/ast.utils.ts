@@ -22,7 +22,11 @@ const findImplementation = (program: any) => {
       continue;
     }
 
-    if (node.specifiers.some((n: any) => n.local.name === 'jsxRuntime') || node.source.value === 'react/jsx-runtime') {
+    if (
+      node.specifiers.some((n: any) => 
+        ['_jsxDEV', 'jsxRuntime'].includes(n.local.name))
+      || ['react/jsx-dev-runtime', 'react/jsx-runtime'].includes(node.source.value)
+    ) {
       return ParserImplementations.new
     }
   }
