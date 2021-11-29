@@ -21,8 +21,6 @@ const findImplementation = (program: any) => {
     if (node.type !== 'ImportDeclaration') {
       continue;
     }
-    
-    console.log(JSON.stringify(node, null, 2));
 
     if (
       node.specifiers.some((n: any) => 
@@ -44,8 +42,6 @@ export function addHashAttributesToJsxTagsAst(program: any, attr: string) {
       parser = newParser
     }
   }
-
-  console.log('implementation', implementation)
   
   return astTransformer(program, (node: any) => {
     if (parser.isNodeReactElement(node) && !parser.isNodeReactFragment(node)) {
