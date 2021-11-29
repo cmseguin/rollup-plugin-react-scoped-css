@@ -3,7 +3,7 @@ import { resolve } from "path";
 import { parse } from "acorn";
 import { astTransformer } from "./ast-transformer";
 
-describe('astTransormer', () => {
+describe('astTransformer', () => {
   it('should iterate through all nodes', async () => {
     let iterationCount = 0;
     const file = await readFile(resolve(__dirname, './__mocks__/sample-code-file.js'), { encoding: 'utf-8' })
@@ -13,7 +13,7 @@ describe('astTransormer', () => {
       iterationCount++;
       expect(node).toBeTruthy();
     })
-    
+
     expect(newAst).toBeDefined();
     expect(iterationCount).toBe(28);
   });
