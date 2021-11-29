@@ -126,7 +126,6 @@ export default function reactScopedCssPlugin(optionsIn: ReactScopedCssPluginOpti
         if (!filter(id)) {
           return;
         }
-
         if (scopedCssInFileRegex.test(code)) {
           const importerHash = generateHash(id);
           const program = this.parse(code)

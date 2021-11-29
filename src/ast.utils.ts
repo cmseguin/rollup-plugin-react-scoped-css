@@ -21,8 +21,14 @@ const findImplementation = (program: any) => {
     if (node.type !== 'ImportDeclaration') {
       continue;
     }
+    
+    console.log(JSON.stringify(node, null, 2));
 
-    if (node.specifiers.some((n: any) => n.local.name === 'jsxRuntime') || node.source.value === 'react/jsx-runtime') {
+    if (
+      node.specifiers.some((n: any) => 
+        ['_jsxDEV', 'jsxRuntime'].includes(n.local.name))
+      || ['react/jsx-dev-runtime', 'react/jsx-runtime'].includes(node.source.value)
+    ) {
       return ParserImplementations.new
     }
   }
@@ -30,16 +36,17 @@ const findImplementation = (program: any) => {
 }
 
 export function addHashAttributesToJsxTagsAst(program: any, attr: string) {
-
   // Once in the program, we can determine which parser to use
   if (global.implementation === null) {
     global.implementation = findImplementation(program)
-
+    
     if (global.implementation === ParserImplementations.new) {
       parser = newParser
     }
   }
 
+  console.log('implementation', implementation)
+  
   return astTransformer(program, (node: any) => {
     if (parser.isNodeReactElement(node) && !parser.isNodeReactFragment(node)) {
       return parser.extendNodeWithAttributes(node, attr)
