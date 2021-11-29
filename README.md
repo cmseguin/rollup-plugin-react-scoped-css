@@ -1,9 +1,32 @@
 # rollup-plugin-react-scoped-css
 
-**IMPORTANT: This plugin is still in its early phase, use at your own risk, but feel free to contribute.**
-
 ## Motivations
 While using react in a professional context, I realized that it was lacking the scopped css feature that I learned to love from Vue and Angular. After some reasearch I came across good plugins, but sadly were not compatible with vite and/or rollup. Thus, I decided to create this plugin which was greatly inspired by the amazing work of [gaoxiaoliangz](https://github.com/gaoxiaoliangz) with his [react-scoped-css plugin](https://github.com/gaoxiaoliangz/react-scoped-css).
+
+## Usage
+
+```jsx
+// Component.jsx
+import './Component.scoped.scss'
+
+export default function Sub() {
+  return (
+    <div className="wrap">
+      <h1>My Component</h1>
+    </div>
+  )
+}
+```
+
+```jsx
+// Component.scoped.jsx
+.wrap {
+  width: 500px;
+  h1 { color: red; }
+}
+```
+
+And just like that the styles will be scoped to the component.
 
 ## How to install
 
