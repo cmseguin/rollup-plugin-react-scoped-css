@@ -34,15 +34,16 @@ const findImplementation = (program: any) => {
 }
 
 export function addHashAttributesToJsxTagsAst(program: any, attr: string) {
+
   // Once in the program, we can determine which parser to use
   if (global.implementation === null) {
     global.implementation = findImplementation(program)
-    
+
     if (global.implementation === ParserImplementations.new) {
       parser = newParser
     }
   }
-  
+
   return astTransformer(program, (node: any) => {
     if (parser.isNodeReactElement(node) && !parser.isNodeReactFragment(node)) {
       return parser.extendNodeWithAttributes(node, attr)
