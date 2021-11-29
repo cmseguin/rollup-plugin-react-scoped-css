@@ -18,8 +18,8 @@ export default function Sub() {
 }
 ```
 
-```jsx
-// Component.scoped.jsx
+```scss
+// Component.scoped.scss
 .wrap {
   width: 500px;
   h1 { color: red; }
