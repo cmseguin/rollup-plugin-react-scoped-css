@@ -26,6 +26,19 @@ export class ClassicJsxParser implements JsxParser {
               ...v,
               properties: [...arg.properties, this.createAttributeNode(attr)],
             };
+          } else if (
+            v.type === "CallExpression" &&
+            v.callee.name === "_objectSpread"
+          ) {
+            const args = [...v.arguments];
+            args[0].properties = [
+              ...args[0].properties,
+              this.createAttributeNode(attr),
+            ];
+            return {
+              ...v,
+              arguments: args,
+            };
           } else {
             return {
               type: "ObjectExpression",
