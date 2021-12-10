@@ -40,7 +40,9 @@
     "rollup": "^2.56.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.16.0",
     "@babel/preset-env": "^7.15.0",
+    "@babel/preset-react": "^7.16.0",
     "@babel/preset-typescript": "^7.15.0",
     "@semantic-release/commit-analyzer": "^9.0.2",
     "@semantic-release/git": "^10.0.1",

@@ -1,54 +1,95 @@
+import {
+  createObjectAssignCallExpressionWithIdentifier,
+  createObjectExpressionWithAttr,
+  extendObjectExpression,
+  hackIntoExtenderCallExpression,
+  isNodeExtender,
+  isNodeIdentifier,
+  isNodeObjectExpression,
+} from "../ast.utils";
 import { JsxParser } from "./jsx-parser.model";
 
 export class NewJsxParser implements JsxParser {
   isNodeReactFragment(node: any) {
-    return (
+    // Always a call expression
+    if (node?.type !== "CallExpression") {
+      return false;
+    }
+
+    if (
       node.arguments?.[0]?.type === "Identifier" &&
       ["_Fragment", "Fragment"].includes(node.arguments?.[0]?.name)
-    );
+    ) {
+      return true;
+    }
+
+    if (
+      node.arguments?.[0]?.type === "MemberExpression" &&
+      ["_Fragment", "Fragment"].includes(node.arguments?.[0]?.property?.name)
+    ) {
+      return true;
+    }
+
+    return false;
   }
 
   isNodeReactElement(node: any) {
-    return (
-      node?.type === "CallExpression" &&
+    // Always a call expression
+    if (node?.type !== "CallExpression") {
+      return false;
+    }
+
+    if (
       ["_jsxDEV", "_jsx", "_jsxs", "jsxDev", "jsx", "jsxs"].includes(
         node?.callee?.name
       )
-    );
+    ) {
+      return true;
+    }
+
+    if (
+      node?.callee?.type === "SequenceExpression" &&
+      ["_jsxDEV", "_jsx", "_jsxs", "jsxDev", "jsx", "jsxs"].includes(
+        node?.callee?.expressions?.[1]?.property?.name
+      )
+    ) {
+      return true;
+    }
+
+    return false;
   }
 
   public extendNodeWithAttributes(node: any, attr: string) {
-    const arg = node?.arguments?.[1];
     return {
       ...node,
       arguments: node?.arguments.map((v: any, i: number) => {
-        if (i === 1) {
-          if (v.type === "ObjectExpression") {
-            return {
-              ...v,
-              properties: [...arg.properties, this.createAttributeNode(attr)],
-            };
-          } else if (
-            v.type === "CallExpression" &&
-            v.callee.name === "_objectSpread"
-          ) {
-            const args = [...v.arguments];
-            args[0].properties = [
-              ...args[0].properties,
-              this.createAttributeNode(attr),
-            ];
-            return {
-              ...v,
-              arguments: args,
-            };
-          } else {
-            return {
-              type: "ObjectExpression",
-              properties: [this.createAttributeNode(attr)],
-            };
-          }
+        // Second argument is attributes so ignore others
+        if (i !== 1) {
+          return v;
         }
-        return v;
+
+        const attrNode = this.createAttributeNode(attr);
+
+        // If it's an object expression, extend it
+        if (isNodeObjectExpression(v)) {
+          return extendObjectExpression(v, attrNode);
+        }
+
+        // If it's an extender, hack into it
+        if (isNodeExtender(v)) {
+          return hackIntoExtenderCallExpression(v, attrNode);
+        }
+
+        // If it's an identifier, do Object.assign to be safe
+        if (isNodeIdentifier(v)) {
+          return createObjectAssignCallExpressionWithIdentifier(
+            v,
+            createObjectExpressionWithAttr(attrNode)
+          );
+        }
+
+        // Worst case override with
+        return createObjectExpressionWithAttr(attrNode);
       }),
     };
   }

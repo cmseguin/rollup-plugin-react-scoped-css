@@ -6,7 +6,7 @@ import { compileStyle } from "@vue/component-compiler-utils";
 import { generate } from "escodegen";
 
 import type { Plugin } from "rollup";
-import { addHashAttributesToJsxTagsAst } from "./ast.utils";
+import { addHashAttributesToJsxTagsAst } from "./ast-program";
 
 const getFilenameFromPath = (filePath: string) => {
   const parts = filePath.split("/");

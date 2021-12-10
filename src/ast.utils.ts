@@ -1,53 +1,104 @@
-import { astIterator } from "./ast-iterator";
-import { astTransformer } from "./ast-transformer";
-import { ClassicJsxParser } from "./parsers/classic-parser";
-import { JsxParser, ParserImplementations } from "./parsers/jsx-parser.model";
-import { NewJsxParser } from "./parsers/new-parser";
-
-declare global {
-  // eslint-disable-next-line
-  var implementation: null | ParserImplementations;
-}
-
-global.implementation = null;
-
-const classicParser = new ClassicJsxParser();
-const newParser = new NewJsxParser();
-
-let parser: JsxParser = classicParser;
-
-const findImplementation = (program: any) => {
-  const implementation: ParserImplementations = ParserImplementations.classic;
-  for (const node of astIterator(program)) {
-    if (node.type !== "ImportDeclaration") {
-      continue;
-    }
-
-    if (
-      node.specifiers.some((n: any) =>
-        ["_jsxDEV", "jsxRuntime"].includes(n.local.name)
-      ) ||
-      ["react/jsx-dev-runtime", "react/jsx-runtime"].includes(node.source.value)
-    ) {
-      return ParserImplementations.new;
-    }
-  }
-  return implementation;
+export const createObjectAssignCallExpressionWithIdentifier = (
+  identifier: any,
+  objectExpression: any
+) => {
+  return {
+    type: "CallExpression",
+    callee: {
+      type: "MemberExpression",
+      object: {
+        type: "Identifier",
+        name: "Object",
+      },
+      property: {
+        type: "Identifier",
+        name: "assign",
+      },
+      computed: false,
+      optional: false,
+    },
+    arguments: [
+      {
+        type: "ObjectExpression",
+        start: 14,
+        end: 16,
+        properties: [],
+      },
+      identifier,
+      objectExpression,
+    ],
+    optional: false,
+  };
 };
 
-export function addHashAttributesToJsxTagsAst(program: any, attr: string) {
-  // Once in the program, we can determine which parser to use
-  if (global.implementation === null) {
-    global.implementation = findImplementation(program);
+export const createObjectExpressionWithAttr = (attrNode: any) => {
+  return {
+    type: "ObjectExpression",
+    properties: [attrNode],
+  };
+};
 
-    if (global.implementation === ParserImplementations.new) {
-      parser = newParser;
-    }
+export const extendObjectExpression = (objectExpression: any, prop: any) => {
+  return {
+    ...objectExpression,
+    properties: [...objectExpression.properties, prop],
+  };
+};
+
+export const hackIntoExtenderCallExpression = (
+  callExpression: any,
+  prop: any
+) => {
+  return {
+    ...callExpression,
+    arguments: [
+      ...callExpression.arguments,
+      createObjectExpressionWithAttr(prop),
+    ],
+  };
+};
+
+export const isNodeCallExpression = (node: any) => {
+  return node.type === "CallExpression";
+};
+
+export const isNodeObjectExpression = (node: any) => {
+  return node.type === "ObjectExpression";
+};
+
+export const isNodeExtender = (node: any) => {
+  return (
+    isNodeCallExpression(node) &&
+    (node.callee.name === "_objectSpread" || node.callee.name === "_extends")
+  );
+};
+
+export const isNodeIdentifier = (node: any) => {
+  return node.type === "Identifier";
+};
+
+export const isNodeImportDeclaration = (node: any) => {
+  return node.type === "ImportDeclaration";
+};
+
+export const isNodeRequireCallExpression = (node: any) => {
+  return (
+    isNodeCallExpression(node) &&
+    node.callee.name === "require" &&
+    node.arguments.length === 1
+  );
+};
+
+export const isNodeImportOrRequire = (node: any) => {
+  return isNodeImportDeclaration(node) || isNodeRequireCallExpression(node);
+};
+
+export const getSrcFromImportOrRequire = (node: any) => {
+  if (isNodeImportDeclaration(node)) {
+    return node.source.value;
   }
-
-  return astTransformer(program, (node: any) => {
-    if (parser.isNodeReactElement(node) && !parser.isNodeReactFragment(node)) {
-      return parser.extendNodeWithAttributes(node, attr);
-    }
-  });
-}
+  if (isNodeRequireCallExpression(node)) {
+    return node.arguments[0].value;
+  }
+  return null;
+};
