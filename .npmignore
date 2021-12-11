@@ -1,1 +1,8 @@
-examples
+examples/
+src/
+babel.config.js
+.eslintrc.js
+.env
+.env.development
+.vscode/
+.github/

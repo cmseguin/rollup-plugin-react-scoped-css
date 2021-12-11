@@ -27,6 +27,9 @@ export default function Sub() {
 ```
 And just like that the styles will be scoped to the component.
 
+## Limitations
+Due to the way this plugin is working, it will apply the scope to the file and not the component individually... This may differ from other frameworks since they don't really let you define multiple components in the same file. This then means that if you have 2 components in the same file, the styles might conflict.
+
 ## Technicality
 since this plugin uses the engine of vue to scope the css to the components, the following sections come straight from the [vue documentation](https://vue-loader.vuejs.org/guide/scoped-css.html#deep-selectors).
 
