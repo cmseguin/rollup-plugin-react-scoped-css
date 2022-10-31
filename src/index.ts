@@ -79,7 +79,7 @@ export interface VitePartialPlugin extends Plugin {
   enforce?: "pre" | "post";
 }
 
-export default function reactScopedCssPlugin(
+export function reactScopedCssPlugin(
   optionsIn: ReactScopedCssPluginOptions = {}
 ): VitePartialPlugin[] {
   const options: Partial<ReactScopedCssPluginOptions> = {
