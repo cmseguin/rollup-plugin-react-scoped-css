@@ -4,9 +4,9 @@ import { xxHash32 } from "js-xxhash";
 import { createFilter, FilterPattern } from "@rollup/pluginutils";
 import { compileStyle } from "@vue/component-compiler-utils";
 import { generate } from "escodegen";
+import { addHashAttributesToJsxTagsAst } from "./ast-program";
 
 import type { Plugin } from "rollup";
-import { addHashAttributesToJsxTagsAst } from "./ast-program";
 
 const getFilenameFromPath = (filePath: string) => {
   const parts = filePath.split("/");
