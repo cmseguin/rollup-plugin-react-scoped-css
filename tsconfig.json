@@ -1,9 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "ES2022",
+    "target": "ES2021",
+    "module": "ESNext",
     "moduleResolution": "node",
-    "lib": ["es2017", "es7", "es6", "dom"],
     "declaration": true,
     "outDir": "dist",
     "strict": true,
