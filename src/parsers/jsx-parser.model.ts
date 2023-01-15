@@ -5,6 +5,6 @@ export interface JsxParser {
 }
 
 export enum ParserImplementations {
-  new = "new",
-  classic = "classic",
+  modern = "modern",
+  legacy = "legacy",
 }

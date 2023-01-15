@@ -9,7 +9,16 @@ import {
 } from "../ast.utils";
 import { JsxParser } from "./jsx-parser.model";
 
-export class NewJsxParser implements JsxParser {
+export class ModernJsxParser implements JsxParser {
+  private reactCalleeNames = [
+    "_jsxDEV",
+    "_jsx",
+    "_jsxs",
+    "jsxDev",
+    "jsx",
+    "jsxs",
+    "jsxDEV",
+  ];
   isNodeReactFragment(node: any) {
     // Always a call expression
     if (node?.type !== "CallExpression") {
@@ -39,17 +48,13 @@ export class NewJsxParser implements JsxParser {
       return false;
     }
 
-    if (
-      ["_jsxDEV", "_jsx", "_jsxs", "jsxDev", "jsx", "jsxs"].includes(
-        node?.callee?.name
-      )
-    ) {
+    if (this.reactCalleeNames.includes(node?.callee?.name)) {
       return true;
     }
 
     if (
       node?.callee?.type === "SequenceExpression" &&
-      ["_jsxDEV", "_jsx", "_jsxs", "jsxDev", "jsx", "jsxs"].includes(
+      this.reactCalleeNames.includes(
         node?.callee?.expressions?.[1]?.property?.name
       )
     ) {

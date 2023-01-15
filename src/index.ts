@@ -1,5 +1,5 @@
 /* eslint-disable no-useless-escape */
-import * as path from "path";
+import { resolve, dirname } from "path";
 import { xxHash32 } from "js-xxhash";
 import { createFilter, FilterPattern } from "@rollup/pluginutils";
 import { compileStyle } from "@vue/component-compiler-utils";
@@ -125,8 +125,8 @@ export function reactScopedCssPlugin(
 
         if (scopedCssRegex.test(source) && jsxRegex.test(importer)) {
           const importerHash = generateHash(importer);
-          const url = path.resolve(
-            path.dirname(importer),
+          const url = resolve(
+            dirname(importer),
             `${source}?scope=${importerHash}`
           );
           return url;
@@ -140,6 +140,7 @@ export function reactScopedCssPlugin(
         if (!filter(id)) {
           return;
         }
+
         if (scopedCssInFileRegex.test(code)) {
           const importerHash = generateHash(id);
           const program = this.parse(code);

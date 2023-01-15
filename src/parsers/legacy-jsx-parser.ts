@@ -9,7 +9,7 @@ import {
 } from "../ast.utils";
 import { JsxParser } from "./jsx-parser.model";
 
-export class ClassicJsxParser implements JsxParser {
+export class LegacyJsxParser implements JsxParser {
   public isNodeReactFragment(node: any) {
     return (
       (node?.callee?.object?.name === "React" ||

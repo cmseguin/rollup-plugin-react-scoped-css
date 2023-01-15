@@ -4,6 +4,7 @@
   "description": "A rollup plugin designed to allow scoped css to be run in react (Compatible with vite and rollup)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
@@ -37,7 +38,7 @@
     "@vue/component-compiler-utils": "^3.2.2",
     "escodegen": "^2.0.0",
     "js-xxhash": "^1.0.4",
-    "rollup": "^2.56.2"
+    "rollup": "^3.10.0"
   },
   "devDependencies": {
     "@babel/core": "^7.16.0",

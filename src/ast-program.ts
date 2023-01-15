@@ -1,9 +1,9 @@
 import { astIterator } from "./ast-iterator";
 import { astTransformer } from "./ast-transformer";
 import { getSrcFromImportOrRequire, isNodeImportOrRequire } from "./ast.utils";
-import { ClassicJsxParser } from "./parsers/classic-parser";
+import { LegacyJsxParser } from "./parsers/legacy-jsx-parser";
+import { ModernJsxParser } from "./parsers/modern-jsx-parser";
 import { JsxParser, ParserImplementations } from "./parsers/jsx-parser.model";
-import { NewJsxParser } from "./parsers/new-parser";
 
 declare global {
   // eslint-disable-next-line
@@ -12,13 +12,13 @@ declare global {
 
 global.implementation = null;
 
-const classicParser = new ClassicJsxParser();
-const newParser = new NewJsxParser();
+const legacyJsxParser = new LegacyJsxParser();
+const modernJsxParser = new ModernJsxParser();
 
-let parser: JsxParser = classicParser;
+let parser: JsxParser = legacyJsxParser;
 
 const findImplementation = (program: any) => {
-  const implementation: ParserImplementations = ParserImplementations.classic;
+  const implementation: ParserImplementations = ParserImplementations.legacy;
   for (const node of astIterator(program)) {
     if (!isNodeImportOrRequire(node)) {
       continue;
@@ -27,7 +27,7 @@ const findImplementation = (program: any) => {
     const src = getSrcFromImportOrRequire(node);
 
     if (["react/jsx-dev-runtime", "react/jsx-runtime"].includes(src)) {
-      return ParserImplementations.new;
+      return ParserImplementations.modern;
     }
   }
   return implementation;
@@ -38,8 +38,8 @@ export function addHashAttributesToJsxTagsAst(program: any, attr: string) {
   if (global.implementation === null) {
     global.implementation = findImplementation(program);
 
-    if (global.implementation === ParserImplementations.new) {
-      parser = newParser;
+    if (global.implementation === ParserImplementations.modern) {
+      parser = modernJsxParser;
     }
   }
 
