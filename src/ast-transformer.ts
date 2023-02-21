@@ -8,6 +8,10 @@ const isNode = (obj: any) => {
 };
 
 export const astTransformer = (ast: any, callback: (ast: any) => any) => {
+  if (!ast) {
+    return ast;
+  }
+
   for (const key of Object.keys(ast)) {
     if (["end", "start", "type"].includes(key)) {
       continue;

@@ -20,4 +20,20 @@ describe("astTransformer", () => {
     expect(newAst).toBeDefined();
     expect(iterationCount).toBe(28);
   });
+
+  it("should handle array destructuring with an unbound element without errors", async () => {
+    const file = await readFile(
+      resolve(
+        __dirname,
+        "./__mocks__/sample-code-array-destructuring-unbound-element.js"
+      ),
+      { encoding: "utf-8" }
+    );
+    const ast = parse(file, { sourceType: "module", ecmaVersion: 2022 });
+
+    const newAst = astTransformer(ast, () => {
+      // do nothing
+    });
+    expect(newAst).toBeDefined();
+  });
 });
