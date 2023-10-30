@@ -30,24 +30,20 @@ And just like that the styles will be scoped to the component.
 ## Limitations
 Due to the way this plugin is working, it will apply the scope to the file and not the component individually... This may differ from other frameworks since they don't really let you define multiple components in the same file. This then means that if you have 2 components in the same file, the styles might conflict.
 
-## Technicality
-since this plugin uses the engine of vue to scope the css to the components, the following sections come straight from the [vue documentation](https://vue-loader.vuejs.org/guide/scoped-css.html#deep-selectors).
-
 ### Deep selector
-If you want a selector in scoped styles to be "deep", i.e. affecting child components, you can use the >>> combinator:
+If you want a selector in scoped styles to be "deep", i.e. affecting child components, you can use the ::deep combinator:
 ```css
-.a >>> .b { /* ... */ }
+.a:deep .b { /* ... */ }
 ```
 The above will be compiled into:
 ```css
 .a[data-v-f3f3eg9] .b { /* ... */ }
 ```
-Some pre-processors, such as Sass, may not be able to parse >>> properly. In those cases you can use the /deep/ or ::v-deep combinator instead - both are aliases for >>> and work exactly the same. Based on the example above these two expressions will be compiled to the same output:
+Another exepted format, which will generate the same resutl, is:
 ```scss
 .a::v-deep .b { /* ... */ }
-/* or */
-.a /deep/ .b { /* ... */ }
 ```
+This is primarly for backwards compatibility, we recommend the `:deep` selector.
 ### Dynamically Generated Content
 DOM content created with dangerouslySetInnerHTML are not affected by scoped styles, but you can still style them using deep selectors.
 
