@@ -2,9 +2,9 @@
 import { resolve, dirname } from "path";
 import { xxHash32 } from "js-xxhash";
 import { createFilter, FilterPattern } from "@rollup/pluginutils";
-import { compileStyle } from "@vue/component-compiler-utils";
 import { generate } from "escodegen";
 import { addHashAttributesToJsxTagsAst } from "./ast-program";
+import { scopeCss } from "./css/scope-css";
 
 import type { Plugin } from "rollup";
 
@@ -22,18 +22,6 @@ const getHashFromPath = (filePath: string) => {
 const generateHash = (input: string, seed = 0) => {
   const hashNum = xxHash32(Buffer.from(input, "utf8"), seed);
   return hashNum.toString(16);
-};
-
-const addAttributesToCss = (src: string, fileName: string, hash: string) => {
-  const { code } = compileStyle({
-    source: src,
-    filename: fileName,
-    id: hash,
-    scoped: true,
-    trim: true,
-  });
-
-  return code;
 };
 
 export interface ReactScopedCssPluginOptions {
@@ -153,7 +141,7 @@ export function reactScopedCssPlugin(
 
         if (scopedCssRegex.test(getFilenameFromPath(id))) {
           const importerHash = getHashFromPath(id);
-          return addAttributesToCss(
+          return scopeCss(
             code,
             getFilenameFromPath(id),
             `data-${options.hashPrefix}-${importerHash}`
