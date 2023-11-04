@@ -1,4 +1,4 @@
-const isNode = (obj: any) => {
+const isNode = (obj: unknown) => {
   return (
     typeof obj === "object" &&
     typeof (obj as any)?.end === "number" &&
