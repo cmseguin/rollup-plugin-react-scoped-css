@@ -17,8 +17,8 @@ jobs:
         id: extract_version
         run: echo "::set-output name=version::$(echo ${{ github.ref }} | sed -n 's/refs\/heads\/releases\/\(.*\)-alpha/\1/p')"
       - name: Extract rc from package.json
-        id: extract_rc
-        run: echo "::set-output name=rc::$(node -p "require('./package.json').version" | sed -n -e '/-alpha\./{s/.*\.\([0-9][0-9]*\)$/\1/p;q;}' -e 's/.*$/0/p')"
+        id: next_extract_rc
+        run: echo "::set-output name=rc::$(node -p "require('./package.json').version" | awk -F '-alpha\\.' '{if (NF > 1) {print $2 + 1} else {print 0}}')"
       - name: Use Node.js 20.x
         uses: actions/setup-node@v2
         with:
@@ -30,7 +30,8 @@ jobs:
       - name: Bump version and publish to npm
         run: |
           # Use the extracted version number for your release process
-          npm version ${{ steps.extract_version.outputs.version }} prerelease --preid=alpha
+          echo "Version: ${{ steps.extract_version.outputs.version }}-alpha.${{ steps.next_extract_rc.outputs.rc }}"
+          npm version ${{ steps.extract_version.outputs.version }}-alpha.${{ steps.next_extract_rc.outputs.rc }} --no-git-tag-version
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
