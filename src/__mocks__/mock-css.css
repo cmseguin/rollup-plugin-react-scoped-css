@@ -11,3 +11,7 @@ div.content-container .button { cursor: crosshair; }
 .content-container::deep span.nested { color: pink; }
 .content-container::v-deep .nested2 { color: yellow; }
 .button, .button::deep .n2 { border-radius: 4px; }
+
+.content-container .sub1 .sub2 { width: 100%; }
+.content-container .sub1::deep .sub2 { width: 100%; }
+.content-container::deep .sub1 .sub2 { width: 100%; }
