@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - 'releases/**-alpha'
-    paths-ignore:
-      - '.github/**'
+    # paths-ignore:
+    #   - '.github/**'
 
 jobs:
   release:
