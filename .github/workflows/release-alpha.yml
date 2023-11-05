@@ -30,8 +30,7 @@ jobs:
       - name: Bump version and publish to npm
         run: |
           # Use the extracted version number for your release process
-          echo "Version: ${{ steps.extract_version.outputs.version }}-alpha.${{ steps.extract_rc.outputs.rc }}"
-          npm version ${{ steps.extract_version.outputs.version }}-alpha.${{ steps.extract_rc.outputs.rc }} --no-git-tag-version
+          npm version ${{ steps.extract_version.outputs.version }} prerelease --preid=alpha
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

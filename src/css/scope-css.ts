@@ -85,41 +85,6 @@ export function scopeCss(css: string, filename: string, hash: string) {
           }
         }
       });
-
-      // const results = findAll(
-      //   selectorList,
-      //   (node: CssNode) =>
-      //     node.type === "PseudoElementSelector" &&
-      //     (node.name === "v-deep" || node.name === "deep")
-      // );
-
-      // if (results.length > 0) {
-      //   results.forEach((node: CssNode) => {
-      //     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //     //@ts-ignore: optimization hack, we need to override the object without changing the reference.
-      //     node.children = undefined;
-      //     node.loc = undefined;
-      //     Object.assign(node, attributeSelector);
-      //   });
-      // } else {
-      //   selectorList.children.forEach((selector) => {
-      //     if (selector.type === "Selector") {
-      //       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //       // @ts-ignore: Tail is not exposed via @types/css-tree but does exist.
-      //       let item = selector.children.tail;
-
-      //       while (
-      //         item !== null &&
-      //         (item?.data?.type === "PseudoClassSelector" ||
-      //           item?.data?.type === "PseudoElementSelector" ||
-      //           item?.data?.type === "Combinator")
-      //       ) {
-      //         item = item.prev;
-      //       }
-      //       selector.children.insertData(attributeSelector, item.next);
-      //     }
-      //   });
-      // }
     });
 
     return generate(ast);
