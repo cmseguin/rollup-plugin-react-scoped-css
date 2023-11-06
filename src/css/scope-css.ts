@@ -1,7 +1,6 @@
 import {
   parse,
   generate,
-  SelectorList,
   AttributeSelector,
   StyleSheet,
   CssNode,
@@ -92,22 +91,15 @@ export function scopeCss(css: string, filename: string, hash: string) {
           return;
         }
 
-        let hasHitDeep = false;
         let item = (selector.children as LinkedList).head;
 
-        while (item !== null || hasHitDeep) {
-          // Only to satisfy typescript
-          if (item === null) {
-            break;
-          }
-
+        while (item !== null) {
           if (isScopedAttributeSelector(item, hash)) {
             item = item?.next ?? null;
             continue;
           }
 
           if (item.next && isScopePiercingPseudoSelector(item.next)) {
-            hasHitDeep = true;
             Object.assign(item.next.data, attributeSelector);
             break;
           }
