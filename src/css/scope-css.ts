@@ -30,9 +30,11 @@ export function scopeCss(css: string, filename: string, hash: string) {
       return (
         (item?.data?.type === "TypeSelector" ||
           item?.data?.type === "ClassSelector" ||
-          item?.data?.type === "AttributeSelector") &&
+          item?.data?.type === "AttributeSelector" ||
+          item?.data?.type === "IdSelector") &&
         (item?.next?.data?.type === "ClassSelector" ||
-          item?.next?.data?.type === "AttributeSelector")
+          item?.next?.data?.type === "AttributeSelector" ||
+          item?.next?.data?.type === "IdSelector")
       );
     };
 
