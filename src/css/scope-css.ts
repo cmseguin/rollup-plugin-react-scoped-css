@@ -89,12 +89,7 @@ export function scopeCss(css: string, filename: string, hash: string) {
               break;
             }
 
-            if (item?.data?.type === "Combinator") {
-              item = item?.next ?? null;
-              continue;
-            }
-
-            if (isChainedSelector(item)) {
+            if (isChainedSelector(item) || isCombinator(item)) {
               item = item?.next ?? null;
               continue;
             }
