@@ -71,7 +71,6 @@ export function reactScopedCssPlugin(
   optionsIn: ReactScopedCssPluginOptions = {}
 ): VitePartialPlugin[] {
   const options: Partial<ReactScopedCssPluginOptions> = {
-    hashPrefix: "v",
     styleFileSuffix: "scoped",
     styleFileExtensions: ["scss", "css", "sass", "less"],
     jsxFileExtensions: ["jsx", "tsx"],
@@ -132,20 +131,19 @@ export function reactScopedCssPlugin(
         if (scopedCssInFileRegex.test(code)) {
           const importerHash = generateHash(id);
           const program = this.parse(code);
-          const newAst = addHashAttributesToJsxTagsAst(
-            program,
-            `data-${options.hashPrefix}-${importerHash}`
-          );
+          const scopedAttr = options.hashPrefix
+            ? `data-${options.hashPrefix}-${importerHash}`
+            : `data-${importerHash}`;
+          const newAst = addHashAttributesToJsxTagsAst(program, scopedAttr);
           return generate(newAst);
         }
 
         if (scopedCssRegex.test(getFilenameFromPath(id))) {
           const importerHash = getHashFromPath(id);
-          return scopeCss(
-            code,
-            getFilenameFromPath(id),
-            `data-${options.hashPrefix}-${importerHash}`
-          );
+          const scopedAttr = options.hashPrefix
+            ? `data-${options.hashPrefix}-${importerHash}`
+            : `data-${importerHash}`;
+          return scopeCss(code, getFilenameFromPath(id), scopedAttr);
         }
       },
     },

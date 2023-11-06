@@ -50,7 +50,7 @@
     "@semantic-release/github": "8.0.7",
     "@semantic-release/npm": "11.0.1",
     "@semantic-release/release-notes-generator": "10.0.3",
-    "@types/css-tree": "^2.3.3",
+    "@types/css-tree": "2.3.3",
     "@types/escodegen": "0.0.7",
     "@types/estree": "1.0.0",
     "@types/jest": "29.2.5",

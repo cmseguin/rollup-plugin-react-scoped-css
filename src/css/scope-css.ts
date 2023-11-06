@@ -62,10 +62,12 @@ const isChainedSelector = (item: ListItem<CssNode>) => {
     (item?.data?.type === "TypeSelector" ||
       item?.data?.type === "ClassSelector" ||
       item?.data?.type === "AttributeSelector" ||
-      item?.data?.type === "IdSelector") &&
+      item?.data?.type === "IdSelector" ||
+      item?.data?.type === "PseudoClassSelector") &&
     (item?.next?.data?.type === "ClassSelector" ||
       item?.next?.data?.type === "AttributeSelector" ||
-      item?.next?.data?.type === "IdSelector")
+      item?.next?.data?.type === "IdSelector" ||
+      item?.next?.data?.type === "PseudoClassSelector")
   );
 };
 

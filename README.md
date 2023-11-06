@@ -4,8 +4,97 @@
 While using react in a professional context, I realized that it was lacking the scopped css feature that I learned to love from Vue and Angular. After some reasearch I came across good plugins, but sadly were not compatible with vite and/or rollup. Thus, I decided to create this plugin which was greatly inspired by the amazing work of [gaoxiaoliangz](https://github.com/gaoxiaoliangz) with his [react-scoped-css plugin](https://github.com/gaoxiaoliangz/react-scoped-css).
 
 ## Requirements
-+ **node** >= 20.0.0  
-+ **vite** >= 4.0.0
++ **node** >= 16
++ **vite** >= 4
+
+## How to install
+
+```sh
+$ npm i rollup-plugin-react-scoped-css
+```
+
+### Simple Configuration
+
+in vite:
+```js
+// vite.config.js
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { reactScopedCssPlugin } from 'rollup-plugin-react-scoped-css'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react(), reactScopedCssPlugin()]
+})
+```
+
+in rollup:
+```js
+// rollup.config.js
+import reactScopedCssPlugin from 'rollup-plugin-react-scoped-css';
+
+export default {
+  input: 'src/input.js',
+  output: { file: 'ouput.js' },
+  plugins: [ reactScopedCssPlugin() ]
+};
+```
+
+***Notes:** Because this plugin has been built with a majority of it's usecase with vite, this plugin doesn't handle transpiling LESS, SCSS or other preprocessors. For that reason, you will likely need to add your transpilation plugins before reactScopedCssPlugin.*
+
+### Customizing the plugin
+There are a few options available to customize how the plugin works
+```ts
+{
+  /**
+   * Which files should be included and parsed by the plugin
+   * Default: undefined
+   */
+  include?: FilterPattern
+
+  /**
+   * Which files should be exluded and that should not be parsed by the plugin
+   * Default: undefined
+   */
+  exclude?: FilterPattern
+
+  /**
+   * If you want to customize the stylesheet file pattern
+   * if undefined or '' is passed, all files will be evaluated
+   * Default: 'scoped'
+   */
+  styleFileSuffix?: string
+
+  /**
+   * If you want to customize the attribute prefix that is added to the jsx elements
+   * Default: 'v'
+   */
+  hashPrefix?: string
+
+  /**
+   * If you want to customize the preprocessors
+   * Default: ['scss', 'css', 'sass', 'less']
+   */
+  styleFileExtensions?: string[]
+
+  /**
+   * If you have jsx in other file extensions
+   * Default: ['jsx', 'tsx']
+   */
+  jsxFileExtensions?: string[]
+}
+```
+
+### Advanced rollup usecases
+Since this plugin works in two parts, you might need to expose the first part, then add any other plugin, and then expose the second part of the plugin. This part is automatically handled with vite thanks to the enforce attribute.
+
+```js
+const reactScopedPlugins = reactScopedCssPlugin()
+export default {
+  //...
+  plugins: [ reactScopedPlugins[0], {...stylingPlugins}, reactScopedPlugins[1] ]
+};
+```
 
 ## Usage
 
@@ -55,93 +144,6 @@ DOM content created with dangerouslySetInnerHTML are not affected by scoped styl
 Scoped styles do not eliminate the need for classes. Due to the way browsers render various CSS selectors, p { color: red } will be many times slower when scoped (i.e. when combined with an attribute selector). If you use classes or ids instead, such as in .example { color: red }, then you virtually eliminate that performance hit.
 
 Be careful with descendant selectors in recursive components! For a CSS rule with the selector .a .b, if the element that matches .a contains a recursive child component, then all .b in that child component will be matched by the rule.
-
-## How to install
-
-```sh
-$ npm i rollup-plugin-react-scoped-css
-```
-
-### Simple Configuration
-
-in vite:
-```js
-// vite.config.js
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { reactScopedCssPlugin } from 'rollup-plugin-react-scoped-css'
-
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react(), reactScopedCssPlugin()]
-})
-```
-
-in rollup:
-```js
-// rollup.config.js
-import reactScopedCssPlugin from 'rollup-plugin-react-scoped-css';
-
-export default {
-  input: 'src/input.js',
-  output: { file: 'ouput.js' },
-  plugins: [ reactScopedCssPlugin() ]
-};
-```
-
-### Customizing the plugin
-There are a few options available to customize how the plugin works
-```ts
-{
-  /**
-   * Which files should be included and parsed by the plugin
-   * Default: undefined
-   */
-  include?: FilterPattern
-
-  /**
-   * Which files should be exluded and that should not be parsed by the plugin
-   * Default: undefined
-   */
-  exclude?: FilterPattern
-
-  /**
-   * If you want to customize the stylesheet file pattern
-   * if undefined or '' is passed, all files will be evaluated
-   * Default: 'scoped'
-   */
-  styleFileSuffix?: string
-
-  /**
-   * If you want to customize the attribute prefix that is added to the jsx elements
-   * Default: 'v'
-   */
-  hashPrefix?: string
-
-  /**
-   * If you want to customize the preprocessors
-   * Default: ['scss', 'css', 'sass', 'less']
-   */
-  styleFileExtensions?: string[]
-
-  /**
-   * If you have jsx in other file extensions
-   * Default: ['jsx', 'tsx']
-   */
-  jsxFileExtensions?: string[]
-}
-```
-
-### With other rollup plugins
-Since this plugin works in two parts, you might need to expose the first part, then add any other plugin, and then expose the second part of the plugin. This part is automatically handled with vite thanks to the enforce attribute.
-
-```js
-const reactScopedPlugins = reactScopedCssPlugin()
-export default {
-  //...
-  plugins: [ reactScopedPlugins[0], {...stylingPlugins}, reactScopedPlugins[1] ]
-};
-```
 
 ## Contributing
 Anyone is free to open a PR and contribute to this project... just be civilized!
