@@ -37,7 +37,7 @@ Due to the way this plugin is working, it will apply the scope to the file and n
 ### Deep selector
 If you want a selector in scoped styles to be "deep", i.e. affecting child components, you can use the ::deep combinator:
 ```css
-.a:deep .b { /* ... */ }
+.a::deep .b { /* ... */ }
 ```
 The above will be compiled into:
 ```css
@@ -47,7 +47,7 @@ Another exepted format, which will generate the same resutl, is:
 ```scss
 .a::v-deep .b { /* ... */ }
 ```
-This is primarly for backwards compatibility, we recommend the `:deep` selector.
+This is primarly for backwards compatibility, we recommend the `::deep` selector.
 ### Dynamically Generated Content
 DOM content created with dangerouslySetInnerHTML are not affected by scoped styles, but you can still style them using deep selectors.
 
@@ -145,3 +145,4 @@ export default {
 
 ## Contributing
 Anyone is free to open a PR and contribute to this project... just be civilized!
+
