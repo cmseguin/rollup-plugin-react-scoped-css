@@ -175,5 +175,12 @@ describe("scope-css", () => {
         "@media only screen and (min-width: 480px), tv and (max-width: 962px) { .content-container[data-v-123456] { width: 962px; } div[data-v-123456] { background: green; } }"
       );
     });
+
+    it("should scope with recursive media query", () => {
+      validateCss(
+        "@media (min-width: 480px) { @media (min-width: 240px) { .content-container { width: 962px; } div { background: green; } } }",
+        "@media (min-width: 480px) { @media (min-width: 240px) { .content-container[data-v-123456] { width: 962px; } div[data-v-123456] { background: green; } } }"
+      );
+    });
   });
 });
