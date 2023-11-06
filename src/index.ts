@@ -70,11 +70,6 @@ export interface VitePartialPlugin extends Plugin {
 export function reactScopedCssPlugin(
   optionsIn: ReactScopedCssPluginOptions = {}
 ): VitePartialPlugin[] {
-  console.warn(
-    `This plugin version is in alpha stage and not yet stable. Use at your own risk.
-    For a more stable version, use the rollup-plugin-react-scoped-css@0 package.`
-  );
-
   const options: Partial<ReactScopedCssPluginOptions> = {
     hashPrefix: "v",
     styleFileSuffix: "scoped",
