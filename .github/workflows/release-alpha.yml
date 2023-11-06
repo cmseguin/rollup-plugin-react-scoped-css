@@ -18,7 +18,7 @@ jobs:
         run: echo "::set-output name=version::$(echo ${{ github.ref }} | sed -n 's/refs\/heads\/releases\/\(.*\)-alpha/\1/p')"
       - name: Extract rc from package.json
         id: next_extract_rc
-        run: echo "::set-output name=rc::$(node -p "require('./package.json').version" | awk -F '-alpha\\.' '{if (NF > 1) {print $2 + 1} else {print 0}}')"
+        run: echo "::set-output name=rc::$(npm show rollup-plugin-react-scoped-css versions --json | grep -E '${{ steps.extract_version.outputs.version }}-alpha' | sed 's/"//g; s/,//g' | sort -V | tail -n 1 | tail | awk -F '-alpha\\.' '{if (NF > 1) {print $2 + 1} else {print 0}}')"
       - name: Use Node.js 20.x
         uses: actions/setup-node@v2
         with:
