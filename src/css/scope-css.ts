@@ -1,16 +1,45 @@
 import {
   parse,
   generate,
-  CssNode,
-  findAll,
   SelectorList,
   AttributeSelector,
   StyleSheet,
+  CssNode,
+  ListItem,
 } from "css-tree";
 
 export function scopeCss(css: string, filename: string, hash: string) {
   try {
     const ast = parse(css) as StyleSheet;
+
+    const isScopePiercingPseudoSelector = (item: ListItem<CssNode>) => {
+      return (
+        item?.data?.type === "PseudoElementSelector" &&
+        (item?.data?.name === "v-deep" || item?.data?.name === "deep")
+      );
+    };
+
+    const isScopedAttributeSelector = (item: ListItem<CssNode>) => {
+      return (
+        item?.data?.type === "AttributeSelector" &&
+        item?.data?.name?.name === hash
+      );
+    };
+
+    const isChainedSelector = (item: ListItem<CssNode>) => {
+      return (
+        (item?.data?.type === "TypeSelector" ||
+          item?.data?.type === "ClassSelector" ||
+          item?.data?.type === "AttributeSelector") &&
+        (item?.next?.data?.type === "ClassSelector" ||
+          item?.next?.data?.type === "AttributeSelector")
+      );
+    };
+
+    const isCombinator = (item: ListItem<CssNode>) => {
+      return item?.data?.type === "Combinator";
+    };
+
     const attributeSelector: AttributeSelector = {
       type: "AttributeSelector",
       name: { type: "Identifier", name: hash },
@@ -42,27 +71,21 @@ export function scopeCss(css: string, filename: string, hash: string) {
         if (selector.type === "Selector") {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore: Head is not exposed via @types/css-tree but does exist.
-          let item = selector.children.head;
+          let item: ListItem<CssNode> | null = selector.children.head;
           let hasHitDeep = false;
           while (item !== null) {
-            if (
-              item?.next?.data?.type === "PseudoElementSelector" &&
-              (item?.next?.data?.name === "v-deep" ||
-                item?.next?.data?.name === "deep")
-            ) {
-              hasHitDeep = true;
-              item.next.children = undefined;
-              item.next.loc = undefined;
-              Object.assign(item.next.data, attributeSelector);
-
-              if (!item.next) {
-                break;
-              }
-
+            if (isScopedAttributeSelector(item)) {
               item = item?.next ?? null;
+              continue;
             }
 
             if (hasHitDeep) {
+              break;
+            }
+
+            if (item.next && isScopePiercingPseudoSelector(item.next)) {
+              hasHitDeep = true;
+              Object.assign(item.next.data, attributeSelector);
               break;
             }
 
@@ -71,17 +94,18 @@ export function scopeCss(css: string, filename: string, hash: string) {
               continue;
             }
 
-            if (
-              (item?.data?.type === "TypeSelector" ||
-                item?.data?.type === "ClassSelector") &&
-              item?.next?.data?.type === "ClassSelector"
-            ) {
+            if (isChainedSelector(item)) {
               item = item?.next ?? null;
               continue;
             }
 
+            if (item?.next === null) {
+              selector.children.appendData(attributeSelector);
+            } else {
+              selector.children.insertData(attributeSelector, item.next);
+            }
+
             item = item?.next ?? null;
-            selector.children.insertData(attributeSelector, item);
           }
         }
       });

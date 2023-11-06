@@ -15,3 +15,7 @@ div.content-container .button { cursor: crosshair; }
 .content-container .sub1 .sub2 { width: 100%; }
 .content-container .sub1::deep .sub2 { width: 100%; }
 .content-container::deep .sub1 .sub2 { width: 100%; }
+
+div.container.other-class { color:blue; }
+div.container[data-x="test"] { color:green; }
+div.container.other-class[data-x="test"] { color:green; }
