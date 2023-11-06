@@ -3,6 +3,10 @@
 ## Motivations
 While using react in a professional context, I realized that it was lacking the scopped css feature that I learned to love from Vue and Angular. After some reasearch I came across good plugins, but sadly were not compatible with vite and/or rollup. Thus, I decided to create this plugin which was greatly inspired by the amazing work of [gaoxiaoliangz](https://github.com/gaoxiaoliangz) with his [react-scoped-css plugin](https://github.com/gaoxiaoliangz/react-scoped-css).
 
+## Requirements
++ **node** >= 20.0.0  
++ **vite** >= 4.0.0
+
 ## Usage
 
 ```jsx
@@ -141,3 +145,4 @@ export default {
 
 ## Contributing
 Anyone is free to open a PR and contribute to this project... just be civilized!
+
