@@ -40,7 +40,7 @@ export default {
 };
 ```
 
-***Notes:** Because this plugin has been built with a majority of it's usecase with vite, this plugin doesn't handle transpiling LESS, SCSS or other preprocessors. For that reason, you will likely need to add your transpilation plugins before reactScopedCssPlugin.*
+***Notes:** Because this plugin has been built with vite as its primary usecase, it doesn't transpile LESS, SCSS or other preprocessors. For that reason, you will likely need to add your transpilation plugins before reactScopedCssPlugin if you plan on using this without vite.*
 
 ### Customizing the plugin
 There are a few options available to customize how the plugin works
@@ -85,7 +85,7 @@ There are a few options available to customize how the plugin works
 }
 ```
 
-### Advanced rollup usecases
+### Advanced Rollup usecases
 Since this plugin works in two parts, you might need to expose the first part, then add any other plugin, and then expose the second part of the plugin. This part is automatically handled with vite thanks to the enforce attribute.
 
 ```js
@@ -130,7 +130,7 @@ If you want a selector in scoped styles to be "deep", i.e. affecting child compo
 ```
 The above will be compiled into:
 ```css
-.a[data-v-f3f3eg9] .b { /* ... */ }
+.a[data-f3f3eg9] .b { /* ... */ }
 ```
 Another exepted format, which will generate the same resutl, is:
 ```scss
@@ -147,4 +147,3 @@ Be careful with descendant selectors in recursive components! For a CSS rule wit
 
 ## Contributing
 Anyone is free to open a PR and contribute to this project... just be civilized!
-
