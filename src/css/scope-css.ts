@@ -102,6 +102,7 @@ export function scopeCss(css: string, filename: string, hash: string) {
           item = item?.next ?? null;
         }
 
+        // This is true if one of the two break statements above was run. Which means we don't want to add to the last one.
         if (itemsToInsertScopeBefore[currentChunkIndex]) {
           itemsToInsertScopeBefore.pop();
         }
