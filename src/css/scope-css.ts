@@ -50,7 +50,10 @@ const isScopePiercingPseudoSelector = (item: ListItem<CssNode>) => {
   );
 };
 
-const isScopedAttributeSelector = (item: ListItem<CssNode>, hash: string) => {
+const isThisScopedAttributeSelector = (
+  item: ListItem<CssNode>,
+  hash: string
+) => {
   return (
     item?.data?.type === "AttributeSelector" && item?.data?.name?.name === hash
   );
@@ -62,11 +65,28 @@ const isChainedSelector = (item: ListItem<CssNode>) => {
       item?.data?.type === "ClassSelector" ||
       item?.data?.type === "AttributeSelector" ||
       item?.data?.type === "IdSelector" ||
-      item?.data?.type === "PseudoClassSelector") &&
+      item?.data?.type === "PseudoClassSelector" ||
+      item?.data?.type === "PseudoElementSelector") &&
     (item?.next?.data?.type === "ClassSelector" ||
       item?.next?.data?.type === "AttributeSelector" ||
       item?.next?.data?.type === "IdSelector" ||
-      item?.next?.data?.type === "PseudoClassSelector")
+      item?.next?.data?.type === "PseudoClassSelector" ||
+      item?.next?.data?.type === "PseudoElementSelector")
+  );
+};
+
+const isPseudoSelector = (item: ListItem<CssNode>) => {
+  return (
+    item?.data?.type === "PseudoClassSelector" ||
+    item?.data?.type === "PseudoElementSelector"
+  );
+};
+
+const isNextItemScopable = (item: ListItem<CssNode>) => {
+  return (
+    item?.next?.data?.type === "ClassSelector" ||
+    item?.next?.data?.type === "AttributeSelector" ||
+    item?.next?.data?.type === "IdSelector"
   );
 };
 
@@ -96,7 +116,12 @@ export function scopeCss(css: string, filename: string, hash: string) {
         let item = (selector.children as LinkedList).head;
 
         while (item !== null) {
-          if (isScopedAttributeSelector(item, hash)) {
+          if (
+            (isChainedSelector(item) && isNextItemScopable(item)) ||
+            isCombinator(item) ||
+            isPseudoSelector(item) ||
+            isThisScopedAttributeSelector(item, hash)
+          ) {
             item = item?.next ?? null;
             continue;
           }
@@ -106,17 +131,12 @@ export function scopeCss(css: string, filename: string, hash: string) {
             break;
           }
 
-          if (isChainedSelector(item) || isCombinator(item)) {
-            item = item?.next ?? null;
-            continue;
-          }
-
           if (item?.next === null) {
             selector.children.appendData(attributeSelector);
-          } else {
-            selector.children.insertData(attributeSelector, item.next);
+            break;
           }
 
+          selector.children.insertData(attributeSelector, item.next);
           item = item?.next ?? null;
         }
       });

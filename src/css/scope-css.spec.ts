@@ -58,10 +58,17 @@ describe("scope-css", () => {
     );
   });
 
-  it("scopes selectors chain with pseudo class selectors", () => {
+  it("scopes selectors chain with pseudo selectors in weird order", () => {
     validateCss(
       "a.anchor:active.class2 { color: pink; }",
-      "a.anchor:active.class2[data-123456] { color: pink; }"
+      "a.anchor[data-123456]:active.class2[data-123456] { color: pink; }"
+    );
+  });
+
+  it("scopes selectors chain with pseudo selectors with lots of chain", () => {
+    validateCss(
+      ".tire .eu-labels .eu-label span:not(.skeleton-image):not(.extra)::before { color: purple; }",
+      ".tire[data-123456] .eu-labels[data-123456] .eu-label[data-123456] span[data-123456]:not(.skeleton-image):not(.extra)::before { color: purple; }"
     );
   });
 
