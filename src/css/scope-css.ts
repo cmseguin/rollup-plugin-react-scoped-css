@@ -22,6 +22,8 @@ interface LinkedList<T = CssNode> extends List<T> {
   tail: LinkedListNode<T> | null;
 }
 
+type ItemArray = Array<LinkedListNode>;
+
 const getSelectors = (items: List<CssNode>): LinkedList[] => {
   const selectorLists = items.reduce((acc, node) => {
     if (node.type === "Rule" && node?.prelude?.type === "SelectorList") {
@@ -50,43 +52,10 @@ const isScopePiercingPseudoSelector = (item: ListItem<CssNode>) => {
   );
 };
 
-const isThisScopedAttributeSelector = (
-  item: ListItem<CssNode>,
-  hash: string
-) => {
-  return (
-    item?.data?.type === "AttributeSelector" && item?.data?.name?.name === hash
-  );
-};
-
-const isChainedSelector = (item: ListItem<CssNode>) => {
-  return (
-    (item?.data?.type === "TypeSelector" ||
-      item?.data?.type === "ClassSelector" ||
-      item?.data?.type === "AttributeSelector" ||
-      item?.data?.type === "IdSelector" ||
-      item?.data?.type === "PseudoClassSelector" ||
-      item?.data?.type === "PseudoElementSelector") &&
-    (item?.next?.data?.type === "ClassSelector" ||
-      item?.next?.data?.type === "AttributeSelector" ||
-      item?.next?.data?.type === "IdSelector" ||
-      item?.next?.data?.type === "PseudoClassSelector" ||
-      item?.next?.data?.type === "PseudoElementSelector")
-  );
-};
-
 const isPseudoSelector = (item: ListItem<CssNode>) => {
   return (
     item?.data?.type === "PseudoClassSelector" ||
     item?.data?.type === "PseudoElementSelector"
-  );
-};
-
-const isNextItemScopable = (item: ListItem<CssNode>) => {
-  return (
-    item?.next?.data?.type === "ClassSelector" ||
-    item?.next?.data?.type === "AttributeSelector" ||
-    item?.next?.data?.type === "IdSelector"
   );
 };
 
@@ -115,30 +84,32 @@ export function scopeCss(css: string, filename: string, hash: string) {
 
         let item = (selector.children as LinkedList).head;
 
+        const itemsToInsertScopeBefore: ItemArray = [];
+        let currentChunkIndex = 0;
+
         while (item !== null) {
-          if (
-            (isChainedSelector(item) && isNextItemScopable(item)) ||
-            isCombinator(item) ||
-            isPseudoSelector(item) ||
-            isThisScopedAttributeSelector(item, hash)
-          ) {
-            item = item?.next ?? null;
-            continue;
-          }
-
-          if (item.next && isScopePiercingPseudoSelector(item.next)) {
-            Object.assign(item.next.data, attributeSelector);
+          if (isScopePiercingPseudoSelector(item)) {
+            Object.assign(item.data, attributeSelector);
             break;
-          }
-
-          if (item?.next === null) {
+          } else if (isCombinator(item) || isPseudoSelector(item)) {
+            currentChunkIndex += 1;
+          } else if (item.next) {
+            itemsToInsertScopeBefore[currentChunkIndex] = item.next;
+          } else {
             selector.children.appendData(attributeSelector);
             break;
           }
-
-          selector.children.insertData(attributeSelector, item.next);
           item = item?.next ?? null;
         }
+
+        // This is true if one of the two break statements above was run. Which means we don't want to add to the last one.
+        if (itemsToInsertScopeBefore[currentChunkIndex]) {
+          itemsToInsertScopeBefore.pop();
+        }
+
+        itemsToInsertScopeBefore.forEach((scopePositionItem) => {
+          selector.children.insertData(attributeSelector, scopePositionItem);
+        });
       });
     });
 
