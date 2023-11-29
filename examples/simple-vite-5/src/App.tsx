@@ -1,6 +1,6 @@
 import { useState } from "react";
+import "./App.global.css";
 import "./App.css";
-import "./App.scoped.css";
 import { Sub } from "./Sub";
 
 function App() {

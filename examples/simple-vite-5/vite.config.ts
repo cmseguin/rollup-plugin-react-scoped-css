@@ -1,8 +1,13 @@
-import { defineConfig, PluginOption } from "vite";
+import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { reactScopedCssPlugin } from "rollup-plugin-react-scoped-css";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), reactScopedCssPlugin()],
+  plugins: [
+    react(),
+    reactScopedCssPlugin({
+      scopeStyleByDefault: true,
+    }),
+  ],
 });

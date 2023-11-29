@@ -38,29 +38,42 @@ export interface ReactScopedCssPluginOptions {
   exclude?: FilterPattern;
 
   /**
-   * If you want to customize the stylesheet file pattern
-   * if undefined or '' is passed, all files will be evaluated
+   * If you want regular files to be scoped & global files to be .global.css
+   * Default: false
+   */
+  scopeStyleByDefault?: boolean;
+
+  /**
+   * If you want to customize the pattern for scoped styles.
+   * This will only work if scopeStyleByDefault is false
    * Default: 'scoped'
    */
-  styleFileSuffix?: string;
+  scopedStyleSuffix?: string;
+
+  /**
+   * If you want to customize the pattern for global styles.
+   * This will only work if scopeStyleByDefault is true
+   * Default: 'global'
+   */
+  globalStyleSuffix?: string;
+
+  /**
+   * If you want to customize the pattern for style files.
+   * Default: ['css', 'scss', 'sass', 'less']
+   */
+  styleFileExtensions?: string[];
+
+  /**
+   * If you want to customize the pattern for jsx files.
+   * Default: ['jsx', 'tsx']
+   */
+  jsxFileExtensions?: string[];
 
   /**
    * If you want to customize the attribute prefix that is added to the jsx elements
    * Default: 'v'
    */
   hashPrefix?: string;
-
-  /**
-   * If you want to customize the stylesheet extensions
-   * Default: ['scss', 'css', 'sass', 'less']
-   */
-  styleFileExtensions?: string[];
-
-  /**
-   * If you have jsx in other file extensions
-   * Default: ['jsx', 'tsx']
-   */
-  jsxFileExtensions?: string[];
 }
 
 export interface VitePartialPlugin extends Plugin {
@@ -71,36 +84,52 @@ export function reactScopedCssPlugin(
   optionsIn: ReactScopedCssPluginOptions = {}
 ): VitePartialPlugin[] {
   const options: Partial<ReactScopedCssPluginOptions> = {
-    styleFileSuffix: "scoped",
-    styleFileExtensions: ["scss", "css", "sass", "less"],
+    scopeStyleByDefault: false,
+    scopedStyleSuffix: "scoped",
+    globalStyleSuffix: "global",
+    styleFileExtensions: ["css", "scss", "sass", "less"],
     jsxFileExtensions: ["jsx", "tsx"],
     ...optionsIn,
   };
 
-  if (!options.styleFileExtensions || !options.styleFileExtensions.length) {
+  const {
+    exclude,
+    globalStyleSuffix,
+    hashPrefix,
+    jsxFileExtensions,
+    include,
+    scopeStyleByDefault,
+    scopedStyleSuffix,
+    styleFileExtensions,
+  } = options;
+
+  if (!styleFileExtensions || !styleFileExtensions.length) {
     throw new Error("You need to provide at least one style file extension");
   }
 
-  if (!options.jsxFileExtensions || !options.jsxFileExtensions.length) {
+  if (!jsxFileExtensions || !jsxFileExtensions.length) {
     throw new Error("You need to provide at least one jsx file extension");
   }
 
-  const filter = createFilter(options.include, options.exclude);
-  const scopedCssRegex = options.styleFileSuffix
-    ? new RegExp(
-        `\.${options.styleFileSuffix}\.(${options.styleFileExtensions.join(
+  const filter = createFilter(include, exclude);
+  const scopedCssRegex = new RegExp(
+    !scopeStyleByDefault
+      ? `([^\.]+\.${scopedStyleSuffix}\.(${styleFileExtensions.join("|")}))$`
+      : `([^\.]+\.(${styleFileExtensions.join("|")}))$`
+  );
+  const scopedCssInFileRegex = new RegExp(
+    !scopeStyleByDefault
+      ? `([^\.]+\.${scopedStyleSuffix}\.(${styleFileExtensions.join(
           "|"
-        )})$`
-      )
-    : new RegExp(`\.(${options.styleFileExtensions.join("|")})$`);
-  const scopedCssInFileRegex = options.styleFileSuffix
-    ? new RegExp(
-        `\.${options.styleFileSuffix}\.(${options.styleFileExtensions.join(
-          "|"
-        )})(\"|\')`
-      )
-    : new RegExp(`\.(${options.styleFileExtensions.join("|")})(\"|\')`);
-  const jsxRegex = new RegExp(`\.(${options.jsxFileExtensions.join("|")})$`);
+        )}))(\"|\')`
+      : `([^\.]+\.(${styleFileExtensions.join("|")}))(\"|\')`
+  );
+
+  const globalCssRegex = new RegExp(
+    `\.${globalStyleSuffix}\.(${styleFileExtensions.join("|")})$`
+  );
+
+  const jsxRegex = new RegExp(`\.(${jsxFileExtensions.join("|")})$`);
 
   return [
     {
@@ -111,6 +140,10 @@ export function reactScopedCssPlugin(
         }
 
         if (scopedCssRegex.test(source) && jsxRegex.test(importer)) {
+          if (scopeStyleByDefault && globalCssRegex.test(source)) {
+            return;
+          }
+
           const importerHash = generateHash(importer);
           const url = resolve(
             dirname(importer),
@@ -128,11 +161,17 @@ export function reactScopedCssPlugin(
           return;
         }
 
-        if (scopedCssInFileRegex.test(code)) {
+        const matches = code.match(scopedCssInFileRegex);
+
+        const shouldScope = matches?.some((match) => {
+          return !(scopeStyleByDefault && globalCssRegex.test(match));
+        });
+
+        if (shouldScope) {
           const importerHash = generateHash(id);
           const program = this.parse(code);
-          const scopedAttr = options.hashPrefix
-            ? `data-${options.hashPrefix}-${importerHash}`
+          const scopedAttr = hashPrefix
+            ? `data-${hashPrefix}-${importerHash}`
             : `data-${importerHash}`;
           const newAst = addHashAttributesToJsxTagsAst(program, scopedAttr);
           const newCode = generate(newAst);
@@ -140,6 +179,10 @@ export function reactScopedCssPlugin(
         }
 
         if (scopedCssRegex.test(getFilenameFromPath(id))) {
+          if (scopeStyleByDefault && globalCssRegex.test(id)) {
+            return;
+          }
+
           const importerHash = getHashFromPath(id);
           const scopedAttr = options.hashPrefix
             ? `data-${options.hashPrefix}-${importerHash}`
