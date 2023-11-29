@@ -135,7 +135,8 @@ export function reactScopedCssPlugin(
             ? `data-${options.hashPrefix}-${importerHash}`
             : `data-${importerHash}`;
           const newAst = addHashAttributesToJsxTagsAst(program, scopedAttr);
-          return generate(newAst);
+          const newCode = generate(newAst);
+          return newCode;
         }
 
         if (scopedCssRegex.test(getFilenameFromPath(id))) {
