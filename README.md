@@ -50,38 +50,51 @@ There are a few options available to customize how the plugin works
    * Which files should be included and parsed by the plugin
    * Default: undefined
    */
-  include?: FilterPattern
+  include?: FilterPattern;
 
   /**
    * Which files should be exluded and that should not be parsed by the plugin
    * Default: undefined
    */
-  exclude?: FilterPattern
+  exclude?: FilterPattern;
 
   /**
-   * If you want to customize the stylesheet file pattern
-   * if undefined or '' is passed, all files will be evaluated
+   * If you want regular files to be scoped & global files to be .global.css
+   * Default: false
+   */
+  scopeStyleByDefault?: boolean;
+
+  /**
+   * If you want to customize the pattern for scoped styles.
+   * This will only work if scopeStyleByDefault is false
    * Default: 'scoped'
    */
-  styleFileSuffix?: string
+  scopedStyleSuffix?: string;
+
+  /**
+   * If you want to customize the pattern for global styles.
+   * This will only work if scopeStyleByDefault is true
+   * Default: 'global'
+   */
+  globalStyleSuffix?: string;
+
+  /**
+   * If you want to customize the pattern for style files.
+   * Default: ['css', 'scss', 'sass', 'less']
+   */
+  styleFileExtensions?: string[];
+
+  /**
+   * If you want to customize the pattern for jsx files.
+   * Default: ['jsx', 'tsx']
+   */
+  jsxFileExtensions?: string[];
 
   /**
    * If you want to customize the attribute prefix that is added to the jsx elements
    * Default: 'v'
    */
-  hashPrefix?: string
-
-  /**
-   * If you want to customize the preprocessors
-   * Default: ['scss', 'css', 'sass', 'less']
-   */
-  styleFileExtensions?: string[]
-
-  /**
-   * If you have jsx in other file extensions
-   * Default: ['jsx', 'tsx']
-   */
-  jsxFileExtensions?: string[]
+  hashPrefix?: string;
 }
 ```
 

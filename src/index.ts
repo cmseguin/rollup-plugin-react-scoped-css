@@ -71,7 +71,7 @@ export interface ReactScopedCssPluginOptions {
 
   /**
    * If you want to customize the attribute prefix that is added to the jsx elements
-   * Default: 'v'
+   * Default: undefined
    */
   hashPrefix?: string;
 }
