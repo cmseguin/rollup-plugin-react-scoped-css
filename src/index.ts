@@ -157,7 +157,7 @@ export function reactScopedCssPlugin(
     {
       name: "rollup-plugin-react-scoped-css:post",
       transform(code, id) {
-        if (!filter(id)) {
+        if (!filter(id) || id.includes("node_modules")) {
           return;
         }
 
