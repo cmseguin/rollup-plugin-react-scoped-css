@@ -1,4 +1,4 @@
-import "./Sub.css";
+import "./Sub.scoped.css";
 import { FC } from "react";
 
 export const Sub: FC<{ className: string }> = ({ className, ...props }) => {

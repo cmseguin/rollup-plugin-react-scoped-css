@@ -7,6 +7,7 @@ import { addHashAttributesToJsxTagsAst } from "./ast-program";
 import { scopeCss } from "./css/scope-css";
 
 import type { Plugin } from "rollup";
+import { getImportDeclarationsValue } from "./utils/getImportDeclarationsValue";
 
 const getFilenameFromPath = (filePath: string) => {
   const parts = filePath.split("/");
@@ -117,13 +118,6 @@ export function reactScopedCssPlugin(
       ? `([^\.]+\.${scopedStyleSuffix}\.(${styleFileExtensions.join("|")}))$`
       : `([^\.]+\.(${styleFileExtensions.join("|")}))$`
   );
-  const scopedCssInFileRegex = new RegExp(
-    !scopeStyleByDefault
-      ? `([^\.]+\.${scopedStyleSuffix}\.(${styleFileExtensions.join(
-          "|"
-        )}))(\"|\')`
-      : `([^\.]+\.(${styleFileExtensions.join("|")}))(\"|\')`
-  );
 
   const globalCssRegex = new RegExp(
     `\.${globalStyleSuffix}\.(${styleFileExtensions.join("|")})$`
@@ -161,33 +155,39 @@ export function reactScopedCssPlugin(
           return;
         }
 
-        const matches = code.match(scopedCssInFileRegex);
+        if (jsxRegex.test(id)) {
+          const rootNode = this.parse(code);
+          const imports = getImportDeclarationsValue(rootNode);
 
-        const shouldScope = matches?.some((match) => {
-          return !(scopeStyleByDefault && globalCssRegex.test(match));
-        });
+          const shouldScope = !!imports?.some((match) => {
+            if (scopeStyleByDefault) {
+              return scopedCssRegex.test(match) && !globalCssRegex.test(match);
+            } else {
+              return scopedCssRegex.test(match);
+            }
+          });
 
-        if (shouldScope) {
-          const importerHash = generateHash(id);
-          const program = this.parse(code);
-          const scopedAttr = hashPrefix
-            ? `data-${hashPrefix}-${importerHash}`
-            : `data-${importerHash}`;
-          const newAst = addHashAttributesToJsxTagsAst(program, scopedAttr);
-          const newCode = generate(newAst);
-          return newCode;
-        }
-
-        if (scopedCssRegex.test(getFilenameFromPath(id))) {
-          if (scopeStyleByDefault && globalCssRegex.test(id)) {
-            return;
+          if (shouldScope) {
+            const importerHash = generateHash(id);
+            const scopedAttr = hashPrefix
+              ? `data-${hashPrefix}-${importerHash}`
+              : `data-${importerHash}`;
+            const newAst = addHashAttributesToJsxTagsAst(rootNode, scopedAttr);
+            const newCode = generate(newAst);
+            return newCode;
           }
+        } else {
+          if (scopedCssRegex.test(getFilenameFromPath(id))) {
+            if (scopeStyleByDefault && globalCssRegex.test(id)) {
+              return;
+            }
 
-          const importerHash = getHashFromPath(id);
-          const scopedAttr = options.hashPrefix
-            ? `data-${options.hashPrefix}-${importerHash}`
-            : `data-${importerHash}`;
-          return scopeCss(code, getFilenameFromPath(id), scopedAttr);
+            const importerHash = getHashFromPath(id);
+            const scopedAttr = options.hashPrefix
+              ? `data-${options.hashPrefix}-${importerHash}`
+              : `data-${importerHash}`;
+            return scopeCss(code, getFilenameFromPath(id), scopedAttr);
+          }
         }
       },
     },

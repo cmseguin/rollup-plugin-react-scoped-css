@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     reactScopedCssPlugin({
-      scopeStyleByDefault: true,
+      scopeStyleByDefault: false,
     }),
   ],
 });
