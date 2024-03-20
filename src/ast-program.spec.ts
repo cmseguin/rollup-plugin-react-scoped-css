@@ -17,6 +17,9 @@ const getAstFromBabelPresetReactTransformer = async (
     filename: "file.js",
     presets,
   });
+
+  if (!compiled?.code) throw new Error("Could not compile file");
+
   const ast = parse(compiled.code, {
     ecmaVersion: 2021,
     sourceType: "module",
