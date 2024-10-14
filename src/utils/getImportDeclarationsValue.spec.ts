@@ -9,7 +9,6 @@ describe("getImportDeclarationsValue", () => {
       resolve(__dirname, "../__mocks__/file-with-imports.js"),
       "utf-8"
     );
-    console.log(parseAst);
     const rootNode = parseAst(content, { allowReturnOutsideFunction: true });
 
     expect(getImportDeclarationsValue(rootNode)).toEqual([
