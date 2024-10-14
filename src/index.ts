@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-escape */
 import { resolve, dirname } from "path";
 import { xxHash32 } from "js-xxhash";
 import { createFilter, FilterPattern } from "@rollup/pluginutils";
@@ -82,7 +81,7 @@ export interface VitePartialPlugin extends Plugin {
 }
 
 export function reactScopedCssPlugin(
-  optionsIn: ReactScopedCssPluginOptions = {}
+  optionsIn: ReactScopedCssPluginOptions = {},
 ): VitePartialPlugin[] {
   const options: Partial<ReactScopedCssPluginOptions> = {
     scopeStyleByDefault: false,
@@ -116,11 +115,11 @@ export function reactScopedCssPlugin(
   const scopedCssRegex = new RegExp(
     !scopeStyleByDefault
       ? `([^\.]+\.${scopedStyleSuffix}\.(${styleFileExtensions.join("|")}))$`
-      : `([^\.]+\.(${styleFileExtensions.join("|")}))$`
+      : `([^\.]+\.(${styleFileExtensions.join("|")}))$`,
   );
 
   const globalCssRegex = new RegExp(
-    `\.${globalStyleSuffix}\.(${styleFileExtensions.join("|")})$`
+    `\.${globalStyleSuffix}\.(${styleFileExtensions.join("|")})$`,
   );
 
   const jsxRegex = new RegExp(`\.(${jsxFileExtensions.join("|")})$`);
@@ -141,7 +140,7 @@ export function reactScopedCssPlugin(
           const importerHash = generateHash(importer);
           const url = resolve(
             dirname(importer),
-            `${source}?scope=${importerHash}`
+            `${source}?scope=${importerHash}`,
           );
           return url;
         }

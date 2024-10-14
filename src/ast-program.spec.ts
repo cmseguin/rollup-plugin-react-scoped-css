@@ -8,7 +8,7 @@ import { transformAsync } from "@babel/core";
 
 const getAstFromBabelPresetReactTransformer = async (
   file: string,
-  presets: any[]
+  presets: any[],
 ) => {
   const reactFile = await readFile(file, {
     encoding: "utf-8",
@@ -46,13 +46,13 @@ describe("AST Utils", () => {
   describe("classic implementation", () => {
     it("Should add the attr to the right elements without preset-env", async () => {
       const ast = await getAstFromBabelPresetReactTransformer(
-        resolve(__dirname, "./__mocks__/react-file.js"),
-        [["@babel/preset-react", { runtime: "classic" }]]
+        resolve(__dirname, "./__mocks__/react-file.jsx"),
+        [["@babel/preset-react", { runtime: "classic" }]],
       );
 
       const compiledWithAttr = await readFile(
         resolve(__dirname, "./__mocks__/babel-preset-react-classic-output.js"),
-        { encoding: "utf-8" }
+        { encoding: "utf-8" },
       );
 
       const modifiedAst = addHashAttributesToJsxTagsAst(ast, "data-v-123456");
@@ -63,16 +63,19 @@ describe("AST Utils", () => {
 
     it("Should add the attr to the right elements with preset-env", async () => {
       const ast = await getAstFromBabelPresetReactTransformer(
-        resolve(__dirname, "./__mocks__/react-file.js"),
-        [["@babel/preset-env"], ["@babel/preset-react", { runtime: "classic" }]]
+        resolve(__dirname, "./__mocks__/react-file.jsx"),
+        [
+          ["@babel/preset-env"],
+          ["@babel/preset-react", { runtime: "classic" }],
+        ],
       );
 
       const compiledWithAttr = await readFile(
         resolve(
           __dirname,
-          "./__mocks__/babel-preset-env-react-classic-output.js"
+          "./__mocks__/babel-preset-env-react-classic-output.js",
         ),
-        { encoding: "utf-8" }
+        { encoding: "utf-8" },
       );
 
       const modifiedAst = addHashAttributesToJsxTagsAst(ast, "data-v-123456");
@@ -85,15 +88,15 @@ describe("AST Utils", () => {
   describe("automatic implementation", () => {
     it("Should add the attr to the right elements without preset-env", async () => {
       const ast = await getAstFromBabelPresetReactTransformer(
-        resolve(__dirname, "./__mocks__/react-file.js"),
-        [["@babel/preset-react", { runtime: "automatic" }]]
+        resolve(__dirname, "./__mocks__/react-file.jsx"),
+        [["@babel/preset-react", { runtime: "automatic" }]],
       );
       const compiledWithAttr = await readFile(
         resolve(
           __dirname,
-          "./__mocks__/babel-preset-react-automatic-output.js"
+          "./__mocks__/babel-preset-react-automatic-output.js",
         ),
-        { encoding: "utf-8" }
+        { encoding: "utf-8" },
       );
 
       const modifiedAst = addHashAttributesToJsxTagsAst(ast, "data-v-123456");
@@ -104,18 +107,18 @@ describe("AST Utils", () => {
 
     it("Should add the attr to the right elements with preset-env", async () => {
       const ast = await getAstFromBabelPresetReactTransformer(
-        resolve(__dirname, "./__mocks__/react-file.js"),
+        resolve(__dirname, "./__mocks__/react-file.jsx"),
         [
           ["@babel/preset-env"],
           ["@babel/preset-react", { runtime: "automatic" }],
-        ]
+        ],
       );
       const compiledWithAttr = await readFile(
         resolve(
           __dirname,
-          "./__mocks__/babel-preset-env-react-automatic-output.js"
+          "./__mocks__/babel-preset-env-react-automatic-output.js",
         ),
-        { encoding: "utf-8" }
+        { encoding: "utf-8" },
       );
 
       const modifiedAst = addHashAttributesToJsxTagsAst(ast, "data-v-123456");

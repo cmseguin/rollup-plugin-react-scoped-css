@@ -1,6 +1,6 @@
 export const createObjectAssignCallExpressionWithIdentifier = (
   identifier: any,
-  objectExpression: any
+  objectExpression: any,
 ) => {
   return {
     type: "CallExpression",
@@ -47,7 +47,7 @@ export const extendObjectExpression = (objectExpression: any, prop: any) => {
 
 export const hackIntoExtenderCallExpression = (
   callExpression: any,
-  prop: any
+  prop: any,
 ) => {
   return {
     ...callExpression,
