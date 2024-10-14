@@ -52,7 +52,7 @@ export class LegacyJsxParser implements JsxParser {
         if (isNodeIdentifier(v)) {
           return createObjectAssignCallExpressionWithIdentifier(
             v,
-            createObjectExpressionWithAttr(attrNode)
+            createObjectExpressionWithAttr(attrNode),
           );
         }
 

@@ -7,7 +7,7 @@ describe("getImportDeclarationsValue", () => {
   it("should return an array of urls", () => {
     const content = fs.readFileSync(
       resolve(__dirname, "../__mocks__/file-with-imports.js"),
-      "utf-8"
+      "utf-8",
     );
     const rootNode = parseAst(content, { allowReturnOutsideFunction: true });
 

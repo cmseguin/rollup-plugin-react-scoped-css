@@ -6,7 +6,6 @@ import { ModernJsxParser } from "./parsers/modern-jsx-parser";
 import { JsxParser, ParserImplementations } from "./parsers/jsx-parser.model";
 
 declare global {
-  // eslint-disable-next-line
   var implementation: null | ParserImplementations;
 }
 

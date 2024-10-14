@@ -8,7 +8,7 @@ describe("astIterator", () => {
     let iterationCount = 0;
     const file = await readFile(
       resolve(__dirname, "./__mocks__/sample-code-file.js"),
-      { encoding: "utf-8" }
+      { encoding: "utf-8" },
     );
     const ast = parse(file, { sourceType: "module", ecmaVersion: 2022 });
 

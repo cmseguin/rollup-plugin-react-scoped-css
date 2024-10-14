@@ -55,7 +55,7 @@ export class ModernJsxParser implements JsxParser {
     if (
       node?.callee?.type === "SequenceExpression" &&
       this.reactCalleeNames.includes(
-        node?.callee?.expressions?.[1]?.property?.name
+        node?.callee?.expressions?.[1]?.property?.name,
       )
     ) {
       return true;
@@ -89,7 +89,7 @@ export class ModernJsxParser implements JsxParser {
         if (isNodeIdentifier(v)) {
           return createObjectAssignCallExpressionWithIdentifier(
             v,
-            createObjectExpressionWithAttr(attrNode)
+            createObjectExpressionWithAttr(attrNode),
           );
         }
 
