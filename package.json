@@ -1,6 +1,6 @@
 {
   "name": "rollup-plugin-react-scoped-css",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "A rollup plugin designed to allow scoped css to be run in react (Compatible with vite and rollup)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
