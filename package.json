@@ -34,11 +34,11 @@
   },
   "homepage": "https://github.com/cmseguin/rollup-plugin-react-scoped-css#readme",
   "dependencies": {
-    "@rollup/pluginutils": "5.1.2",
+    "@rollup/pluginutils": "^5.1.4",
     "css-tree": "3.0.0",
     "escodegen": "2.1.0",
     "js-xxhash": "4.0.0",
-    "rollup": "4.24.0"
+    "rollup": "^4.30.1"
   },
   "devDependencies": {
     "@babel/core": "7.25.8",
