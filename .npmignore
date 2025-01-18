@@ -6,3 +6,4 @@ babel.config.js
 .env.development
 .vscode/
 .github/
+tsconfig.json
