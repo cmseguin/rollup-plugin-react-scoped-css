@@ -1,7 +1,11 @@
 # rollup-plugin-react-scoped-css
 
+[![npm version](https://img.shields.io/npm/v/rollup-plugin-react-scoped-css.svg?style=flat-square)](https://www.npmjs.com/package/rollup-plugin-react-scoped-css)
+[![npm downloads](https://img.shields.io/npm/dm/rollup-plugin-react-scoped-css.svg?style=flat-square)](https://www.npmjs.com/package/rollup-plugin-react-scoped-css)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+
 ## Motivations
-While using react in a professional context, I realized that it was lacking the scopped css feature that I learned to love from Vue and Angular. After some reasearch I came across good plugins, but sadly were not compatible with vite and/or rollup. Thus, I decided to create this plugin which was greatly inspired by the amazing work of [gaoxiaoliangz](https://github.com/gaoxiaoliangz) with his [react-scoped-css plugin](https://github.com/gaoxiaoliangz/react-scoped-css).
+While using react in a professional context, I realized that it was lacking the scoped css feature that I learned to love from Vue and Angular. After some research I came across good plugins, but sadly were not compatible with vite and/or rollup. Thus, I decided to create this plugin.
 
 ## Requirements
 + **node** >= 18
@@ -53,7 +57,7 @@ There are a few options available to customize how the plugin works
   include?: FilterPattern;
 
   /**
-   * Which files should be exluded and that should not be parsed by the plugin
+   * Which files should be excluded and that should not be parsed by the plugin
    * Default: undefined
    */
   exclude?: FilterPattern;
@@ -145,11 +149,11 @@ The above will be compiled into:
 ```css
 .a[data-f3f3eg9] .b { /* ... */ }
 ```
-Another exepted format, which will generate the same resutl, is:
+Another expected format, which will generate the same result, is:
 ```scss
 .a::v-deep .b { /* ... */ }
 ```
-This is primarly for backwards compatibility, we recommend the `::deep` selector.
+This is primarily for backwards compatibility, we recommend the `::deep` selector.
 ### Dynamically Generated Content
 DOM content created with dangerouslySetInnerHTML are not affected by scoped styles, but you can still style them using deep selectors.
 
@@ -160,3 +164,7 @@ Be careful with descendant selectors in recursive components! For a CSS rule wit
 
 ## Contributing
 Anyone is free to open a PR and contribute to this project... just be civilized!
+
+
+## Credits
+Inspired by [react-scoped-css](https://github.com/gaoxiaoliangz/react-scoped-css).
