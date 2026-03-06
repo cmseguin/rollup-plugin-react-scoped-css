@@ -1,9 +1,15 @@
-import { astIterator } from "./ast-iterator";
-import { astTransformer } from "./ast-transformer";
-import { getSrcFromImportOrRequire, isNodeImportOrRequire } from "./ast.utils";
-import { LegacyJsxParser } from "./parsers/legacy-jsx-parser";
-import { ModernJsxParser } from "./parsers/modern-jsx-parser";
-import { JsxParser, ParserImplementations } from "./parsers/jsx-parser.model";
+import { astIterator } from "./ast-iterator.ts";
+import { astTransformer } from "./ast-transformer.ts";
+import {
+  getSrcFromImportOrRequire,
+  isNodeImportOrRequire,
+} from "./ast.utils.ts";
+import { LegacyJsxParser } from "./parsers/legacy-jsx-parser.ts";
+import { ModernJsxParser } from "./parsers/modern-jsx-parser.ts";
+import {
+  JsxParser,
+  ParserImplementations,
+} from "./parsers/jsx-parser.model.ts";
 
 declare global {
   var implementation: null | ParserImplementations;

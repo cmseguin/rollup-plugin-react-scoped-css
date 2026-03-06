@@ -6,8 +6,8 @@ import {
   isNodeExtender,
   isNodeIdentifier,
   isNodeObjectExpression,
-} from "../ast.utils";
-import { JsxParser } from "./jsx-parser.model";
+} from "../ast.utils.ts";
+import { JsxParser } from "./jsx-parser.model.ts";
 
 export class ModernJsxParser implements JsxParser {
   private reactCalleeNames = [

@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
     "target": "ES2021",
-    "module": "CommonJS",
-    "moduleResolution": "node",
+    "module": "preserve",
+    "rewriteRelativeImportExtensions": true,
+    "moduleResolution": "bundler",
     "declaration": true,
+    "rootDir": "./src",
     "outDir": "dist",
     "strict": true,
-    "esModuleInterop": true,
-    "downlevelIteration": true
+    "esModuleInterop": true
   },
   "exclude": [
     "node_modules",
