@@ -2,11 +2,11 @@ import { resolve, dirname } from "path";
 import { xxHash32 } from "js-xxhash";
 import { createFilter, FilterPattern } from "@rollup/pluginutils";
 import { generate } from "escodegen";
-import { addHashAttributesToJsxTagsAst } from "./ast-program";
-import { scopeCss } from "./css/scope-css";
+import { addHashAttributesToJsxTagsAst } from "./ast-program.ts";
+import { scopeCss } from "./css/scope-css.ts";
 
 import type { Plugin } from "rollup";
-import { getImportDeclarationsValue } from "./utils/getImportDeclarationsValue";
+import { getImportDeclarationsValue } from "./utils/getImportDeclarationsValue.ts";
 
 const getFilenameFromPath = (filePath: string) => {
   const parts = filePath.split("/");

@@ -1,6 +1,9 @@
 import { AstNode } from "rollup";
-import { astIterator } from "../ast-iterator";
-import { getSrcFromImportOrRequire, isNodeImportOrRequire } from "../ast.utils";
+import { astIterator } from "../ast-iterator.ts";
+import {
+  getSrcFromImportOrRequire,
+  isNodeImportOrRequire,
+} from "../ast.utils.ts";
 
 export const getImportDeclarationsValue = (root: AstNode) => {
   const urls = [];
