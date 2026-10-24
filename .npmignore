@@ -1,7 +1,9 @@
 examples/
 src/
-babel.config.js
-.eslintrc.js
+babel.config.cjs
+eslint.config.mjs
+.releaserc
+.claude/
 .env
 .env.development
 .vscode/

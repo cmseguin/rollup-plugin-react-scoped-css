@@ -35,7 +35,7 @@ export default defineConfig({
 in rollup:
 ```js
 // rollup.config.js
-import reactScopedCssPlugin from 'rollup-plugin-react-scoped-css';
+import { reactScopedCssPlugin } from 'rollup-plugin-react-scoped-css';
 
 export default {
   input: 'src/input.js',
