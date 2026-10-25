@@ -1,7 +1,7 @@
 {
   "name": "rollup-plugin-react-scoped-css",
   "version": "1.2.6",
-  "description": "Bring scoped CSS to React with Vite & Rollup. Lightweight component-level style isolation similar to Vue and Angular.",
+  "description": "Bring scoped CSS to React with Vite, Rollup & Rolldown. Lightweight component-level style isolation similar to Vue and Angular.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -11,6 +11,8 @@
     "lint": "eslint '*/**/*.{js,jsx,ts,tsx}'",
     "test": "jest",
     "test:e2e": "node e2e/run.mjs",
+    "test:e2e:vite": "node e2e/run.mjs --bundler vite",
+    "test:e2e:bundlers": "node e2e/run.mjs --bundler rollup,rolldown",
     "test:e2e:install": "playwright install chromium"
   },
   "repository": {
@@ -25,6 +27,7 @@
   ],
   "keywords": [
     "rollup",
+    "rolldown",
     "react",
     "css",
     "styles",
@@ -39,6 +42,15 @@
     "isolation"
   ],
   "license": "MIT",
+  "jest": {
+    "modulePathIgnorePatterns": [
+      "<rootDir>/e2e/.cache/"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "<rootDir>/e2e/"
+    ]
+  },
   "bugs": {
     "url": "https://github.com/cmseguin/rollup-plugin-react-scoped-css/issues"
   },

@@ -220,14 +220,7 @@ async function walk(directory) {
   return files;
 }
 
-export async function assertBuiltArtifacts({
-  fixtureDir,
-  state,
-  messages,
-  mode = "build",
-  allowBrokenSourcemap,
-}) {
-  const distDir = path.join(fixtureDir, "dist");
+async function readBundleArtifacts(distDir) {
   const files = await walk(distDir);
   const jsFiles = files.filter((file) => file.endsWith(".js"));
   const cssFiles = files.filter((file) => file.endsWith(".css"));
@@ -244,6 +237,10 @@ export async function assertBuiltArtifacts({
     await Promise.all(cssFiles.map((file) => readFile(file, "utf8")))
   ).join("\n");
 
+  return { js, css, mapFiles };
+}
+
+function assertBundleContents({ js, css, state }) {
   const { appHash, subHash } = state;
   assert.ok(js.includes(`data-${appHash}`), "JS should contain the App hash");
   assert.ok(js.includes(`data-${subHash}`), "JS should contain the Sub hash");
@@ -272,7 +269,9 @@ export async function assertBuiltArtifacts({
     !css.includes(".global-only[data-"),
     "global .global-only must not be scoped in built CSS",
   );
+}
 
+async function assertSourceMaps(mapFiles) {
   const sources = new Set();
   let sourcesContent = "";
   for (const mapFile of mapFiles) {
@@ -297,6 +296,27 @@ export async function assertBuiltArtifacts({
     sourcesContent.includes('className="App"'),
     "sourcemaps should include the original App.tsx JSX in sourcesContent",
   );
+}
 
+export async function assertBuiltArtifacts({
+  fixtureDir,
+  state,
+  messages,
+  mode = "build",
+  allowBrokenSourcemap,
+}) {
+  const artifacts = await readBundleArtifacts(path.join(fixtureDir, "dist"));
+  assertBundleContents({ ...artifacts, state });
+  await assertSourceMaps(artifacts.mapFiles);
   assertViteMessages(messages, { mode, allowBrokenSourcemap });
+}
+
+/**
+ * Assertions for standalone bundlers (Rollup/Rolldown), which emit into
+ * `outDir` and have no Vite logger.
+ */
+export async function assertBundlerArtifacts({ outDir, state }) {
+  const artifacts = await readBundleArtifacts(outDir);
+  assertBundleContents({ ...artifacts, state });
+  await assertSourceMaps(artifacts.mapFiles);
 }
