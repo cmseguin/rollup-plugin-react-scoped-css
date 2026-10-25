@@ -480,22 +480,13 @@ const supported: FeatureCase[] = [
     ".a { color: red; } .b { color: blue; }",
     ".a[data-123456] { color: red; } .b[data-123456] { color: blue; }",
   ],
-];
-
-/**
- * Features that are parsed/serialized in a way the scoper cannot handle.
- * These are marked `it.failing`: the suite stays green while the test
- * documents the expected (correct) output. When a gap is fixed, the
- * corresponding test starts failing, prompting us to move it to `supported`.
- */
-const knownGaps: FeatureCase[] = [
   // ---------------------------------------------------------------------
-  // Selectors made only of pseudo selectors: nothing receives the hash.
+  // Selectors made only of pseudo selectors
   // ---------------------------------------------------------------------
   [
-    "standalone pseudo-class :hover",
+    "standalone pseudo-class",
     ":hover { color: red; }",
-    "[data-123456]:hover { color: red; }",
+    ":hover[data-123456] { color: red; }",
   ],
   [
     "standalone functional :is()",
@@ -518,24 +509,43 @@ const knownGaps: FeatureCase[] = [
     ":has(.a)[data-123456] { color: red; }",
   ],
   [
-    "standalone pseudo-element ::before",
+    "standalone pseudo-element",
     "::before { color: red; }",
     "[data-123456]::before { color: red; }",
   ],
   [
-    "standalone pseudo-element ::slotted()",
+    "standalone ::slotted()",
     "::slotted(.a) { color: red; }",
     "[data-123456]::slotted(.a) { color: red; }",
   ],
+  [
+    "scope attribute with a leading pseudo-element",
+    "*::before { color: red; }",
+    "*[data-123456]::before { color: red; }",
+  ],
+  [
+    "pseudo-class then pseudo-element",
+    ".a:not(.b)::before { color: red; }",
+    ".a[data-123456]:not(.b)::before { color: red; }",
+  ],
+  [
+    "document root pseudo-classes stay global",
+    ":root { --x: red; } :root:has(.a) { color: red; }",
+    ":root { --x: red; } :root:has(.a) { color: red; }",
+  ],
+  [
+    "document root still scopes descendant subjects",
+    ":root .b { color: red; }",
+    ":root .b[data-123456] { color: red; }",
+  ],
 
   // ---------------------------------------------------------------------
-  // Leading pseudo-only compound in a complex selector: the first
-  // compound is skipped because no non-pseudo node registers a position.
+  // Leading pseudo-only compound in a complex selector
   // ---------------------------------------------------------------------
   [
     "leading :hover compound",
     ":hover > .b { color: red; }",
-    "[data-123456]:hover > .b[data-123456] { color: red; }",
+    ":hover[data-123456] > .b[data-123456] { color: red; }",
   ],
   [
     "leading :is() compound",
@@ -554,8 +564,7 @@ const knownGaps: FeatureCase[] = [
   ],
 
   // ---------------------------------------------------------------------
-  // CSS nesting. css-tree parses explicit `&` rules but the scoper does
-  // not descend into a rule's block; implicit nesting is parsed as Raw.
+  // CSS nesting
   // ---------------------------------------------------------------------
   [
     "nesting with & descendant",
@@ -568,14 +577,39 @@ const knownGaps: FeatureCase[] = [
     ".a[data-123456] { & + .b[data-123456] { color: red; } }",
   ],
   [
+    "nesting with & and additional class",
+    ".a { &.foo { color: red; } }",
+    ".a[data-123456] { &.foo[data-123456] { color: red; } }",
+  ],
+  [
+    "nesting with & and pseudo-class",
+    ".a { &:hover { color: red; } }",
+    ".a[data-123456] { &:hover { color: red; } }",
+  ],
+  [
+    "nesting with parent selector at the end",
+    ".a { .b & { color: red; } }",
+    ".a[data-123456]{.b[data-123456] &{color:red}}",
+  ],
+  [
     "implicit descendant nesting",
     ".a { .b { color: red; } }",
-    ".a[data-123456] { .b[data-123456] { color: red; } }",
+    ".a[data-123456]{.b[data-123456]{color:red}}",
   ],
   [
     "implicit child nesting",
     ".a { > .b { color: red; } }",
-    ".a[data-123456] { > .b[data-123456] { color: red; } }",
+    ".a[data-123456]{>.b[data-123456]{color:red}}",
+  ],
+  [
+    "recursively nested rules",
+    ".a { .b { .c { color: red; } } }",
+    ".a[data-123456]{.b[data-123456]{.c[data-123456]{color:red}}}",
+  ],
+  [
+    "recursively nested & rules",
+    ".a { & .b { & .c { color: red; } } }",
+    ".a[data-123456]{& .b[data-123456]{& .c[data-123456]{color:red}}}",
   ],
   [
     "nesting with & inside @media",
@@ -585,46 +619,60 @@ const knownGaps: FeatureCase[] = [
   [
     "implicit nesting inside @media",
     ".a { @media (min-width: 1px) { .b { color: red; } } }",
-    ".a[data-123456] { @media (min-width: 1px) { .b[data-123456] { color: red; } } }",
+    ".a[data-123456]{@media (min-width:1px){.b[data-123456]{color:red}}}",
   ],
 
   // ---------------------------------------------------------------------
-  // Selectors css-tree serializes as Raw are silently left global.
+  // Column combinator (serialized as Raw by css-tree)
   // ---------------------------------------------------------------------
   [
     "column combinator ||",
     ".a || .b { color: red; }",
     ".a[data-123456] || .b[data-123456] { color: red; }",
   ],
+  [
+    "multiple column combinators",
+    ".a || .b || .c { color: red; }",
+    ".a[data-123456] || .b[data-123456] || .c[data-123456] { color: red; }",
+  ],
+  [
+    "column combinator mixed with other combinators",
+    ".a > .b || .c + .d { color: red; }",
+    ".a[data-123456]>.b[data-123456] || .c[data-123456]+.d[data-123456]{color:red}",
+  ],
+  [
+    "column combinator with pseudo selectors",
+    ".a:hover || .b::before { color: red; }",
+    ".a[data-123456]:hover || .b[data-123456]::before { color: red; }",
+  ],
 
   // ---------------------------------------------------------------------
-  // Deep-selector forms not recognized by the scoper.
+  // :deep() function form
   // ---------------------------------------------------------------------
   [
     ":deep() function form",
     ".a :deep(.b) { color: red; }",
     ".a[data-123456] .b { color: red; }",
   ],
+  [
+    ":deep() with a complex argument",
+    ".a :deep(.b > .c) { color: red; }",
+    ".a[data-123456] .b > .c { color: red; }",
+  ],
+  [
+    ":deep() with a selector list argument",
+    ".a :deep(.b, .c) { color: red; }",
+    ".a[data-123456] :is(.b, .c) { color: red; }",
+  ],
+  [
+    "standalone :deep()",
+    ":deep(.a, .b) { color: red; }",
+    ":is(.a, .b) { color: red; }",
+  ],
 ];
 
 describe("css feature support", () => {
-  describe("supported", () => {
-    supported.forEach(([name, input, expected]) => {
-      it(name, () => validateCss(input, expected));
-    });
-  });
-
-  describe("known gaps", () => {
-    knownGaps.forEach(([name, , expected]) => {
-      // Guard against a gap accidentally "passing" because the expected
-      // output itself is not valid CSS.
-      it(`expectation is valid css: ${name}`, () => {
-        expect(() => generate(parse(expected))).not.toThrow();
-      });
-    });
-
-    knownGaps.forEach(([name, input, expected]) => {
-      it.failing(name, () => validateCss(input, expected));
-    });
+  supported.forEach(([name, input, expected]) => {
+    it(name, () => validateCss(input, expected));
   });
 });
