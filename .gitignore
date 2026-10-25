@@ -1,4 +1,5 @@
 node_modules/
 dist/
+.cache/
 .DS_Store
 .env
