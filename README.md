@@ -162,6 +162,55 @@ Scoped styles do not eliminate the need for classes. Due to the way browsers ren
 
 Be careful with descendant selectors in recursive components! For a CSS rule with the selector .a .b, if the element that matches .a contains a recursive child component, then all .b in that child component will be matched by the rule.
 
+## Testing
+
+### Unit tests
+
+```sh
+npm test
+```
+
+### End-to-end Vite compatibility harness
+
+The e2e harness packs the plugin with `npm pack`, installs it into an isolated
+project for each Vite major, then drives Chromium against both the dev server
+and a production build served with `vite preview`.
+
+Prerequisites: Node >= 20.19 and a Playwright browser.
+
+```sh
+npm run test:e2e:install   # once; installs Chromium
+npm run test:e2e           # Vite 5, 6, 7, and 8; dev + build/preview
+```
+
+Options (pass-through after `--`):
+
+```sh
+npm run test:e2e -- --vite 7              # one major (repeatable/comma-separated)
+npm run test:e2e -- --mode dev            # dev, build, or both (default)
+npm run test:e2e -- --browser firefox     # chromium (default), firefox, webkit
+npm run test:e2e -- --headed              # watch the browser
+npm run test:e2e -- --clean --force       # wipe and reinstall cached installs
+npm run test:e2e -- --keep-temp           # keep production build output
+npm run test:e2e -- --allow-broken-sourcemap
+```
+
+The harness asserts that:
+
+- scoped JSX receives `data-<hash>` attributes and every element from a file
+  shares that file's hash;
+- scoped selectors are applied, global styles stay global, and styles from one
+  component do not leak into another;
+- computed styles match in both dev and production builds;
+- emitted CSS contains the scoped selectors and JS contains the matching hash;
+- JS sourcemaps reference the original `.tsx` files and include their content;
+- there are no page/console/network errors and no `SOURCEMAP_BROKEN` warnings.
+
+Vite installs are cached in `e2e/.cache/`; the cache key includes the packed
+plugin, so plugin changes trigger a reinstall. Vite 8 uses Rolldown rather than
+Rollup; `rollup` is installed in the harness only to satisfy this package's peer
+dependency. No CI workflow runs the e2e harness yet — it is a local script.
+
 ## Contributing
 Anyone is free to open a PR and contribute to this project... just be civilized!
 

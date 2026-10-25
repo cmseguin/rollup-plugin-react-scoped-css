@@ -1,4 +1,4 @@
-examples/
+e2e/
 src/
 babel.config.cjs
 eslint.config.mjs
