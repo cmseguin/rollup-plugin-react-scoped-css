@@ -77,6 +77,7 @@
     "jest": "30.2.0",
     "rollup": "^4.59.0",
     "semantic-release": "25.0.3",
+    "source-map-js": "1.2.1",
     "typescript": "5.9.3"
   }
 }

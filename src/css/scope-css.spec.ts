@@ -5,10 +5,25 @@ const validateCss = (inputCss, expectedScopedCss) => {
   const result = scopeCss(inputCss, "test.scoped.css", "data-123456");
   const expectedResult = generate(parse(expectedScopedCss));
 
-  expect(result).toBe(expectedResult);
+  expect(result.code).toBe(expectedResult);
 };
 
 describe("scope-css", () => {
+  it("generates a sourcemap for the transformed css", () => {
+    const result = scopeCss(
+      ".content-container { width: 962px; }",
+      "test.scoped.css",
+      "data-123456",
+    );
+
+    expect(result.map).not.toBeNull();
+
+    const map = JSON.parse(result.map as string);
+    expect(map.version).toBe(3);
+    expect(map.sources).toEqual(["test.scoped.css"]);
+    expect(map.mappings).not.toHaveLength(0);
+  });
+
   describe("Basic css", () => {
     it("scopes basic classes and elements", () => {
       validateCss(
