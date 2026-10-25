@@ -47,17 +47,17 @@ function _toPropertyKey(t) {
   var i = _toPrimitive(t, "string");
   return "symbol" == _typeof(i) ? i : i + "";
 }
-function _toPrimitive(t, r) {
+function _toPrimitive(t, e) {
   if ("object" != _typeof(t) || !t)
     return t;
-  var e = t[Symbol.toPrimitive];
-  if (void 0 !== e) {
-    var i = e.call(t, r || "default");
+  var r;
+  if ("undefined" != typeof Symbol && void 0 !== (r = t[Symbol.toPrimitive])) {
+    var i = r.call(t, e || "default");
     if ("object" != _typeof(i))
       return i;
     throw new TypeError("@@toPrimitive must return a primitive value.");
   }
-  return ("string" === r ? String : Number)(t);
+  return ("string" === e ? String : Number)(t);
 }
 var SubComponent = function SubComponent() {
   return (0, _jsxRuntime.jsx)("div", {
