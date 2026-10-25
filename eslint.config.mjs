@@ -5,6 +5,14 @@ import prettierPlugin from "eslint-plugin-prettier";
 
 export default [
   {
+    ignores: [
+      "**/node_modules/**",
+      "**/__mocks__/**",
+      "**/dist/**",
+      "**/e2e/**",
+    ],
+  },
+  {
     files: ["**/*.{js,jsx,ts,tsx}"],
     languageOptions: {
       ecmaVersion: "latest",
@@ -37,7 +45,7 @@ export default [
       "**/node_modules/**",
       "**/__mocks__/**",
       "**/dist/**",
-      "**/examples/**",
+      "**/e2e/**",
     ],
   },
   {
@@ -50,7 +58,7 @@ export default [
       "**/node_modules/**",
       "**/__mocks__/**",
       "**/dist/**",
-      "**/examples/**",
+      "**/e2e/**",
     ],
   },
   {
@@ -61,7 +69,7 @@ export default [
       "**/node_modules/**",
       "**/__mocks__/**",
       "**/dist/**",
-      "**/examples/**",
+      "**/e2e/**",
     ],
   },
   {
@@ -75,7 +83,7 @@ export default [
       "**/node_modules/**",
       "**/__mocks__/**",
       "**/dist/**",
-      "**/examples/**",
+      "**/e2e/**",
     ],
   },
 ];
