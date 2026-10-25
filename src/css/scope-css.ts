@@ -24,23 +24,30 @@ interface LinkedList<T = CssNode> extends List<T> {
 
 type ItemArray = Array<LinkedListNode>;
 
+/**
+ * Keyframe selectors (`from`, `to`, `50%`) are also parsed as `Rule` nodes with
+ * a `SelectorList` prelude. They need to be left alone, otherwise animations
+ * break by becoming e.g. `0%[data-hash]`.
+ */
+const isKeyframesAtRule = (name: string) =>
+  /^(-[a-z0-9]+-)?keyframes$/i.test(name);
+
 const getSelectors = (items: List<CssNode>): LinkedList[] => {
-  const selectorLists = items.reduce((acc, node) => {
-    if (node.type === "Rule" && node?.prelude?.type === "SelectorList") {
-      acc.push(node.prelude.children as LinkedList);
-    } else if (node.type === "Atrule" && node.name === "media") {
-      node.block?.children.forEach((rule) => {
-        if (rule.type === "Atrule" && rule.name === "media") {
-          const selectors = getSelectors(rule.block?.children as List<CssNode>);
-          acc.push(...selectors);
-        }
-        if (rule.type === "Rule" && rule.prelude.type === "SelectorList") {
-          acc.push(rule.prelude.children as LinkedList);
-        }
-      });
+  const selectorLists: LinkedList[] = [];
+
+  items.forEach((node) => {
+    if (node.type === "Rule" && node.prelude?.type === "SelectorList") {
+      selectorLists.push(node.prelude.children as LinkedList);
+    } else if (
+      node.type === "Atrule" &&
+      node.block &&
+      !isKeyframesAtRule(node.name)
+    ) {
+      // Recurse into conditional/group at-rules (`@media`, `@container`,
+      // `@supports`, `@layer`, `@scope`, etc.) so their rules get scoped too.
+      selectorLists.push(...getSelectors(node.block.children));
     }
-    return acc;
-  }, [] as LinkedList[]);
+  });
 
   return selectorLists;
 };
