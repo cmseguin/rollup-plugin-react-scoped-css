@@ -125,6 +125,28 @@ yourself and put the following between them:
   it, then emits the transformed CSS and replaces the import with an empty
   module.
 
+#### When is the bridge needed?
+
+The bridge is needed when nothing else in your build turns `.css` imports into
+JavaScript. Neither Rollup nor Rolldown does that on its own, so a plain config
+fails as soon as it reaches the first style import.
+
+Use the bridge when:
+
+- you are adding the plugin to a plain Rollup or Rolldown config and want
+  minimal CSS handling — all styles collected into one stylesheet;
+- you don't already have a CSS plugin that can load the scoped imports.
+
+You can skip it when:
+
+- Vite is handling CSS and plugin ordering for you;
+- another CSS plugin already handles `.css` imports. Put that plugin between
+  `scopedCssPre` and `scopedCssPost`, and make sure it accepts the
+  `?scope=<hash>` query the plugin adds to scoped imports.
+
+The bridge only does extraction. If you need style injection, CSS modules,
+preprocessor support, or per-chunk styles, use a dedicated CSS plugin instead.
+
 #### CSS bridge
 Save this next to your config:
 
