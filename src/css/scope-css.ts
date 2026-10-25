@@ -58,6 +58,15 @@ const isRootLikePseudoSelector = (node: CssNode) =>
   node.type === "PseudoClassSelector" &&
   (node.name.toLowerCase() === "root" || node.name.toLowerCase() === "scope");
 
+/**
+ * The `::view-transition-*` tree is rooted at the document root, which never
+ * receives the scope attribute. A bare occurrence can therefore never match
+ * once scoped, so it is left global just like `:root`.
+ */
+const isViewTransitionPseudoElement = (node: CssNode) =>
+  node.type === "PseudoElementSelector" &&
+  node.name.toLowerCase().startsWith("view-transition");
+
 const isCombinator = (node: CssNode) => node.type === "Combinator";
 
 const isNestingSelector = (node: CssNode) => node.type === "NestingSelector";
@@ -222,6 +231,12 @@ export function scopeCss(
       // `:root` / `:scope` refer to the document root and can never match the
       // scope attribute; leave them global.
       if (items.some((item) => isRootLikePseudoSelector(item.data))) {
+        return;
+      }
+
+      // Bare view-transition pseudo-elements are also rooted at the document
+      // root, so scoping them would only produce an unmatchable selector.
+      if (items.some((item) => isViewTransitionPseudoElement(item.data))) {
         return;
       }
 
