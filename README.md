@@ -126,7 +126,7 @@ yourself and put the following between them:
   module.
 
 #### CSS bridge
-Save this next to your config. It mirrors the bridge used by the e2e harness:
+Save this next to your config:
 
 ```js
 // scoped-css-bridge.js
