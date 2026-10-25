@@ -12,6 +12,7 @@ import { chromium, firefox, webkit } from "playwright";
 
 import {
   assertBuiltArtifacts,
+  assertBundlerArtifacts,
   assertDiagnostics,
   assertScopedApp,
   assertViteMessages,
@@ -19,6 +20,11 @@ import {
   expectStyle,
   readDomState,
 } from "./assertions.mjs";
+import {
+  buildWithRollup,
+  buildWithRolldown,
+  serveDirectory,
+} from "./bundlers.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, "..");
@@ -36,6 +42,15 @@ const VITE_MATRIX = {
 const PLUGIN_REACT = "5.2.0";
 const REACT = "18.3.1";
 const ROLLUP = "^4.65.0";
+const ROLLDOWN = "1.2.15";
+const BABEL_CORE = "7.29.7";
+const BABEL_PRESET_REACT = "7.29.7";
+const BABEL_PRESET_TYPESCRIPT = "7.29.7";
+const PLUGIN_BABEL = "7.1.0";
+const PLUGIN_COMMONJS = "29.0.3";
+const PLUGIN_NODE_RESOLVE = "16.0.3";
+const PLUGIN_REPLACE = "6.0.2";
+const BUNDLERS = ["vite", "rollup", "rolldown"];
 const FIXTURE_REV = 1;
 const NPM = process.platform === "win32" ? "npm.cmd" : "npm";
 const BROWSERS = { chromium, firefox, webkit };
@@ -43,20 +58,24 @@ const BROWSERS = { chromium, firefox, webkit };
 const HELP = `Usage: node e2e/run.mjs [options]
 
 Options:
+      --bundler <name>          vite, rollup, rolldown, or all. Repeatable or
+                                comma-separated. Default: all
   -v, --vite <major>            Vite major to test. Repeatable or comma-separated.
                                 Default: 5,6,7,8
-      --mode <dev|build|both>   Which modes to run. Default: both
+      --mode <dev|build|both>   Which modes to run. Default: both. Rollup and
+                                Rolldown run production builds only.
       --browser <name>          chromium, firefox, or webkit. Default: chromium
       --headed                  Run the browser with a visible window
       --keep-temp               Keep build artifacts and installs after the run
       --clean                   Remove the e2e cache before running
-      --force                   Reinstall Vite even when the cache stamp matches
+      --force                   Reinstall even when the cache stamp matches
       --allow-broken-sourcemap  Do not fail on Vite sourcemap warnings
   -h, --help                    Show this message
 `;
 
 const { values } = parseArgs({
   options: {
+    bundler: { type: "string", multiple: true },
     vite: { type: "string", multiple: true, short: "v" },
     mode: { type: "string", default: "both" },
     browser: { type: "string", default: "chromium" },
@@ -79,7 +98,7 @@ const [nodeMajor, nodeMinor] = process.versions.node.split(".").map(Number);
 if (nodeMajor < 20 || (nodeMajor === 20 && nodeMinor < 19)) {
   console.error(
     `Node >= 20.19 is required (found ${process.versions.node}). ` +
-      "Vite 7/8, @vitejs/plugin-react 5, and Playwright all require it.",
+      "Vite 7/8, @vitejs/plugin-react 5, Rolldown, and Playwright all require it.",
   );
   process.exit(1);
 }
@@ -88,6 +107,38 @@ if (!["dev", "build", "both"].includes(values.mode)) {
   fail(`Invalid --mode "${values.mode}". Use dev, build, or both.`);
 }
 const modes = values.mode === "both" ? ["dev", "build"] : [values.mode];
+
+const bundlers = [
+  ...new Set(
+    (
+      values.bundler?.length
+        ? values.bundler.flatMap((value) => value.split(","))
+        : ["all"]
+    )
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .flatMap((value) => (value === "all" ? BUNDLERS : [value])),
+  ),
+];
+
+if (!bundlers.length) {
+  fail("No bundlers selected.");
+}
+
+for (const bundler of bundlers) {
+  if (!BUNDLERS.includes(bundler)) {
+    fail(
+      `Unsupported bundler "${bundler}". Use ${BUNDLERS.join(", ")}, or all.`,
+    );
+  }
+}
+
+if (values.mode === "dev" && bundlers.some((bundler) => bundler !== "vite")) {
+  fail(
+    "The Rollup and Rolldown harnesses run production builds only. " +
+      "Use --mode build or --mode both.",
+  );
+}
 
 const browserName = values.browser;
 if (!BROWSERS[browserName]) {
@@ -208,29 +259,12 @@ async function packPlugin() {
   return path.join(PACK_DIR, packInfo.filename);
 }
 
-async function ensureInstall(major, tarball) {
-  const version = VITE_MATRIX[major];
-  const installDir = path.join(CACHE, `vite-${major}`);
+async function ensureProject({ name, label, marker, packageJson, tarball }) {
+  const installDir = path.join(CACHE, name);
   const fixtureDir = path.join(installDir, "fixture");
 
   await mkdir(installDir, { recursive: true });
 
-  const packageJson = {
-    name: `react-scoped-css-e2e-vite-${major}`,
-    private: true,
-    version: "0.0.0",
-    type: "module",
-    dependencies: {
-      "@vitejs/plugin-react": PLUGIN_REACT,
-      "rollup-plugin-react-scoped-css": "file:./plugin.tgz",
-      react: REACT,
-      "react-dom": REACT,
-    },
-    devDependencies: {
-      vite: version,
-      rollup: ROLLUP,
-    },
-  };
   const packageJsonText = `${JSON.stringify(packageJson, null, 2)}\n`;
   const tarballBytes = await readFile(tarball);
   const stamp = createHash("sha256")
@@ -240,7 +274,9 @@ async function ensureInstall(major, tarball) {
     .digest("hex");
 
   const stampFile = path.join(installDir, ".stamp");
-  const installed = await exists(path.join(installDir, "node_modules", "vite", "package.json"));
+  const installed = await exists(
+    path.join(installDir, "node_modules", marker, "package.json"),
+  );
   let cached = false;
   try {
     cached = (await readFile(stampFile, "utf8")).trim() === stamp;
@@ -249,7 +285,7 @@ async function ensureInstall(major, tarball) {
   }
 
   if (values.force || values.clean || !cached || !installed) {
-    log(`[vite ${major}] installing Vite ${version}...`);
+    log(`[${label}] installing dependencies...`);
     await rm(path.join(installDir, "node_modules"), {
       recursive: true,
       force: true,
@@ -268,15 +304,8 @@ async function ensureInstall(major, tarball) {
     );
     await writeFile(stampFile, stamp);
   } else {
-    log(`[vite ${major}] using cached install`);
+    log(`[${label}] using cached install`);
   }
-
-  // This shim is what lets the runner import a specific Vite version: the
-  // import is resolved from the install directory, not from the repo root.
-  await writeFile(
-    path.join(installDir, "vite-loader.mjs"),
-    'export * from "vite";\n',
-  );
 
   await rm(fixtureDir, { recursive: true, force: true });
   await cp(FIXTURE, fixtureDir, {
@@ -286,8 +315,44 @@ async function ensureInstall(major, tarball) {
         path.basename(source),
       ),
   });
+
+  return { installDir, fixtureDir };
+}
+
+async function ensureViteInstall(major, tarball) {
+  const version = VITE_MATRIX[major];
+  const install = await ensureProject({
+    name: `vite-${major}`,
+    label: `vite ${major}`,
+    marker: "vite",
+    tarball,
+    packageJson: {
+      name: `react-scoped-css-e2e-vite-${major}`,
+      private: true,
+      version: "0.0.0",
+      type: "module",
+      dependencies: {
+        "@vitejs/plugin-react": PLUGIN_REACT,
+        "rollup-plugin-react-scoped-css": "file:./plugin.tgz",
+        react: REACT,
+        "react-dom": REACT,
+      },
+      devDependencies: {
+        vite: version,
+        rollup: ROLLUP,
+      },
+    },
+  });
+
+  // This shim is what lets the runner import a specific Vite version: the
+  // import is resolved from the install directory, not from the repo root.
   await writeFile(
-    path.join(fixtureDir, "package.json"),
+    path.join(install.installDir, "vite-loader.mjs"),
+    'export * from "vite";\n',
+  );
+
+  await writeFile(
+    path.join(install.fixtureDir, "package.json"),
     `${JSON.stringify(
       {
         name: `react-scoped-css-e2e-fixture-vite-${major}`,
@@ -305,7 +370,87 @@ async function ensureInstall(major, tarball) {
     )}\n`,
   );
 
-  return { installDir, fixtureDir, version };
+  return { ...install, version };
+}
+
+async function ensureRollupInstall(tarball) {
+  const install = await ensureProject({
+    name: "rollup",
+    label: "rollup",
+    marker: "rollup",
+    tarball,
+    packageJson: {
+      name: "react-scoped-css-e2e-rollup",
+      private: true,
+      version: "0.0.0",
+      type: "module",
+      dependencies: {
+        "rollup-plugin-react-scoped-css": "file:./plugin.tgz",
+        react: REACT,
+        "react-dom": REACT,
+      },
+      devDependencies: {
+        "@babel/core": BABEL_CORE,
+        "@babel/preset-react": BABEL_PRESET_REACT,
+        "@babel/preset-typescript": BABEL_PRESET_TYPESCRIPT,
+        "@rollup/plugin-babel": PLUGIN_BABEL,
+        "@rollup/plugin-commonjs": PLUGIN_COMMONJS,
+        "@rollup/plugin-node-resolve": PLUGIN_NODE_RESOLVE,
+        "@rollup/plugin-replace": PLUGIN_REPLACE,
+        rollup: ROLLUP,
+      },
+    },
+  });
+
+  await writeFile(
+    path.join(install.installDir, "rollup-bundle-loader.mjs"),
+    `export { rollup } from "rollup";
+export { default as babel } from "@rollup/plugin-babel";
+export { nodeResolve } from "@rollup/plugin-node-resolve";
+export { default as commonjs } from "@rollup/plugin-commonjs";
+export { default as replace } from "@rollup/plugin-replace";
+export { reactScopedCssPlugin } from "rollup-plugin-react-scoped-css";
+`,
+  );
+
+  return install;
+}
+
+async function ensureRolldownInstall(tarball) {
+  const install = await ensureProject({
+    name: "rolldown",
+    label: "rolldown",
+    marker: "rolldown",
+    tarball,
+    packageJson: {
+      name: "react-scoped-css-e2e-rolldown",
+      private: true,
+      version: "0.0.0",
+      type: "module",
+      dependencies: {
+        "rollup-plugin-react-scoped-css": "file:./plugin.tgz",
+        react: REACT,
+        "react-dom": REACT,
+      },
+      devDependencies: {
+        "@babel/core": BABEL_CORE,
+        "@babel/preset-react": BABEL_PRESET_REACT,
+        "@babel/preset-typescript": BABEL_PRESET_TYPESCRIPT,
+        "@rollup/plugin-babel": PLUGIN_BABEL,
+        rolldown: ROLLDOWN,
+      },
+    },
+  });
+
+  await writeFile(
+    path.join(install.installDir, "rolldown-bundle-loader.mjs"),
+    `export { rolldown } from "rolldown";
+export { default as babel } from "@rollup/plugin-babel";
+export { reactScopedCssPlugin } from "rollup-plugin-react-scoped-css";
+`,
+  );
+
+  return install;
 }
 
 async function exercise(browser, url, mode, messages) {
@@ -406,6 +551,32 @@ async function runBuild({ vite, fixtureDir, version, browser }) {
   }
 }
 
+async function runBundlerBuild({ bundler, browser, installDir, fixtureDir }) {
+  const outDir = path.join(fixtureDir, "dist");
+  await rm(outDir, { recursive: true, force: true });
+
+  const api = await import(
+    pathToFileURL(path.join(installDir, `${bundler}-bundle-loader.mjs`)).href
+  );
+
+  if (bundler === "rollup") {
+    await buildWithRollup({ api, fixtureDir, outDir });
+  } else {
+    await buildWithRolldown({ api, fixtureDir, outDir });
+  }
+
+  const server = await serveDirectory(outDir);
+  try {
+    const state = await exercise(browser, server.url, "build", []);
+    await assertBundlerArtifacts({ outDir, state });
+  } finally {
+    await server.close();
+    if (!values["keep-temp"]) {
+      await rm(outDir, { recursive: true, force: true });
+    }
+  }
+}
+
 async function main() {
   if (values.clean) {
     await rm(CACHE, { recursive: true, force: true });
@@ -438,33 +609,70 @@ async function main() {
 
   const results = [];
   try {
-    for (const major of viteMajors) {
-      log(`\n=== Vite ${major} ===`);
-      const install = await ensureInstall(major, tarball);
-      const vite = await import(
-        pathToFileURL(path.join(install.installDir, "vite-loader.mjs")).href
-      );
+    for (const bundler of bundlers) {
+      if (bundler === "vite") {
+        for (const major of viteMajors) {
+          log(`\n=== Vite ${major} ===`);
+          const install = await ensureViteInstall(major, tarball);
+          const vite = await import(
+            pathToFileURL(path.join(install.installDir, "vite-loader.mjs")).href
+          );
 
-      for (const mode of modes) {
-        const startedAt = Date.now();
-        try {
-          if (mode === "dev") {
-            await runDev({ vite, browser, ...install });
-          } else {
-            await runBuild({ vite, browser, ...install });
+          for (const mode of modes) {
+            const startedAt = Date.now();
+            try {
+              if (mode === "dev") {
+                await runDev({ vite, browser, ...install });
+              } else {
+                await runBuild({ vite, browser, ...install });
+              }
+              results.push({
+                label: `vite ${major}`,
+                mode,
+                ok: true,
+                ms: Date.now() - startedAt,
+              });
+              log(`PASS vite ${major} ${mode}`);
+            } catch (error) {
+              results.push({
+                label: `vite ${major}`,
+                mode,
+                ok: false,
+                ms: Date.now() - startedAt,
+              });
+              log(`FAIL vite ${major} ${mode}`);
+              console.error(error);
+            }
           }
-          results.push({ major, mode, ok: true, ms: Date.now() - startedAt });
-          log(`PASS vite ${major} ${mode}`);
-        } catch (error) {
-          results.push({
-            major,
-            mode,
-            ok: false,
-            ms: Date.now() - startedAt,
-          });
-          log(`FAIL vite ${major} ${mode}`);
-          console.error(error);
         }
+        continue;
+      }
+
+      log(`\n=== ${bundler} ===`);
+      const startedAt = Date.now();
+      try {
+        const install =
+          bundler === "rollup"
+            ? await ensureRollupInstall(tarball)
+            : await ensureRolldownInstall(tarball);
+
+        await runBundlerBuild({ bundler, browser, ...install });
+        results.push({
+          label: bundler,
+          mode: "build",
+          ok: true,
+          ms: Date.now() - startedAt,
+        });
+        log(`PASS ${bundler} build`);
+      } catch (error) {
+        results.push({
+          label: bundler,
+          mode: "build",
+          ok: false,
+          ms: Date.now() - startedAt,
+        });
+        log(`FAIL ${bundler} build`);
+        console.error(error);
       }
     }
   } finally {
@@ -475,7 +683,7 @@ async function main() {
   for (const result of results) {
     const status = result.ok ? "PASS" : "FAIL";
     log(
-      `  ${status}  vite ${result.major} ${result.mode}  (${Math.round(
+      `  ${status}  ${result.label} ${result.mode}  (${Math.round(
         result.ms / 1000,
       )}s)`,
     );
