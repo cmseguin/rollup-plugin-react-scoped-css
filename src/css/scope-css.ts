@@ -63,9 +63,19 @@ const isCombinator = (item: ListItem<CssNode>) => {
   return item?.data?.type === "Combinator";
 };
 
-export function scopeCss(css: string, filename: string, hash: string) {
+export interface ScopedCssResult {
+  code: string;
+  map: string | null;
+}
+
+export function scopeCss(
+  css: string,
+  filename: string,
+  hash: string,
+  source = filename,
+): ScopedCssResult {
   try {
-    const ast = parse(css) as StyleSheet;
+    const ast = parse(css, { positions: true, filename: source }) as StyleSheet;
     const selectorLists = getSelectors(ast.children);
 
     const attributeSelector: AttributeSelector = {
@@ -113,9 +123,13 @@ export function scopeCss(css: string, filename: string, hash: string) {
       });
     });
 
-    return generate(ast);
+    const { css: scopedCss, map } = generate(ast, {
+      sourceMap: true,
+    }) as unknown as { css: string; map: { toString(): string } };
+
+    return { code: scopedCss, map: map.toString() };
   } catch (e) {
     console.log(`Failed scoping css of file: ${filename}\n\nError:\n`, e);
-    return css;
+    return { code: css, map: null };
   }
 }

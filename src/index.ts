@@ -7,6 +7,7 @@ import { scopeCss } from "./css/scope-css.ts";
 
 import type { Plugin } from "rollup";
 import { getImportDeclarationsValue } from "./utils/getImportDeclarationsValue.ts";
+import { addLocationsToAst } from "./utils/addLocationsToAst.ts";
 
 const getFilenameFromPath = (filePath: string) => {
   const parts = filePath.split("/");
@@ -172,8 +173,13 @@ export function reactScopedCssPlugin(
               ? `data-${hashPrefix}-${importerHash}`
               : `data-${importerHash}`;
             const newAst = addHashAttributesToJsxTagsAst(rootNode, scopedAttr);
-            const newCode = generate(newAst);
-            return newCode;
+            addLocationsToAst(newAst, code, id);
+            const { code: newCode, map } = generate(newAst, {
+              sourceMap: id,
+              sourceContent: code,
+              sourceMapWithCode: true,
+            }) as unknown as { code: string; map: { toString(): string } };
+            return { code: newCode, map: map.toString() };
           }
         } else {
           if (scopedCssRegex.test(getFilenameFromPath(id))) {
@@ -185,7 +191,7 @@ export function reactScopedCssPlugin(
             const scopedAttr = options.hashPrefix
               ? `data-${options.hashPrefix}-${importerHash}`
               : `data-${importerHash}`;
-            return scopeCss(code, getFilenameFromPath(id), scopedAttr);
+            return scopeCss(code, getFilenameFromPath(id), scopedAttr, id);
           }
         }
       },
