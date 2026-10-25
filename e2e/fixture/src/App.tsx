@@ -9,9 +9,16 @@ function App() {
   return (
     <div className="App">
       <Sub className="external" />
-      <button onClick={() => setCount((count) => count + 1)}>
+      <button
+        id="app-button"
+        type="button"
+        onClick={() => setCount((value) => value + 1)}
+      >
         count is {count}
       </button>
+      <p id="global-only" className="global-only">
+        global styles stay global
+      </p>
     </div>
   );
 }
