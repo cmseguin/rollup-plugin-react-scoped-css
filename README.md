@@ -437,3 +437,6 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, test commands
 
 ## Credits
 Inspired by [react-scoped-css](https://github.com/gaoxiaoliangz/react-scoped-css).
+
+## License
+[MIT](LICENSE)
