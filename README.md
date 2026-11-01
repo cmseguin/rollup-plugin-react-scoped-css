@@ -430,6 +430,8 @@ all three bundlers.
 ## Contributing
 Anyone is free to open a PR and contribute to this project... just be civilized!
 
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, test commands, commit conventions, and pull request process.
+
 
 ## Credits
 Inspired by [react-scoped-css](https://github.com/gaoxiaoliangz/react-scoped-css).
