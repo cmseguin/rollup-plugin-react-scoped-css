@@ -90,7 +90,7 @@ Unit tests are fast and should cover any new scoping logic:
 npm test
 ```
 
-The end-to-end harness drives a real browser against Vite 5–8, Rollup, and
+The end-to-end harness drives a real browser against Vite 2–8, Rollup, and
 Rolldown. It needs Node >= 20.19 and a Playwright browser:
 
 ```sh

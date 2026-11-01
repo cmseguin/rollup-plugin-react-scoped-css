@@ -34,10 +34,20 @@ const PACK_DIR = path.join(CACHE, "pack");
 
 // Latest release of each major at the time this harness was written.
 const VITE_MATRIX = {
+  2: "2.9.18",
+  3: "3.2.11",
+  4: "4.5.14",
   5: "5.4.21",
   6: "6.4.5",
   7: "7.3.7",
   8: "8.3.5",
+};
+// @vitejs/plugin-react dropped support for older Vite majors, so each Vite
+// version needs the plugin release that still declares it as a peer.
+const VITE_REACT_PLUGIN = {
+  2: "1.3.2",
+  3: "2.2.0",
+  4: "4.7.0",
 };
 const PLUGIN_REACT = "5.2.0";
 const REACT = "18.3.1";
@@ -61,7 +71,7 @@ Options:
       --bundler <name>          vite, rollup, rolldown, or all. Repeatable or
                                 comma-separated. Default: all
   -v, --vite <major>            Vite major to test. Repeatable or comma-separated.
-                                Default: 5,6,7,8
+                                Default: 2,3,4,5,6,7,8
       --mode <dev|build|both>   Which modes to run. Default: both. Rollup and
                                 Rolldown run production builds only.
       --browser <name>          chromium, firefox, or webkit. Default: chromium
@@ -234,6 +244,21 @@ function serverUrl(server) {
   throw new Error("Could not determine the Vite server URL");
 }
 
+async function closePreview(preview) {
+  if (typeof preview.close === "function") {
+    await preview.close();
+    return;
+  }
+
+  // Vite <= 4 preview servers expose the raw HTTP server instead of close().
+  const httpServer = preview.httpServer;
+  if (httpServer) {
+    await new Promise((resolve, reject) => {
+      httpServer.close((error) => (error ? reject(error) : resolve()));
+    });
+  }
+}
+
 async function packPlugin() {
   await rm(PACK_DIR, { recursive: true, force: true });
   await mkdir(PACK_DIR, { recursive: true });
@@ -321,6 +346,7 @@ async function ensureProject({ name, label, marker, packageJson, tarball }) {
 
 async function ensureViteInstall(major, tarball) {
   const version = VITE_MATRIX[major];
+  const reactPluginVersion = VITE_REACT_PLUGIN[major] ?? PLUGIN_REACT;
   const install = await ensureProject({
     name: `vite-${major}`,
     label: `vite ${major}`,
@@ -332,7 +358,7 @@ async function ensureViteInstall(major, tarball) {
       version: "0.0.0",
       type: "module",
       dependencies: {
-        "@vitejs/plugin-react": PLUGIN_REACT,
+        "@vitejs/plugin-react": reactPluginVersion,
         "rollup-plugin-react-scoped-css": "file:./plugin.tgz",
         react: REACT,
         "react-dom": REACT,
@@ -361,7 +387,7 @@ async function ensureViteInstall(major, tarball) {
         type: "module",
         dependencies: { react: REACT, "react-dom": REACT },
         devDependencies: {
-          "@vitejs/plugin-react": PLUGIN_REACT,
+          "@vitejs/plugin-react": reactPluginVersion,
           vite: version,
         },
       },
@@ -547,7 +573,7 @@ async function runBuild({ vite, fixtureDir, version, browser }) {
       await rm(path.join(fixtureDir, "dist"), { recursive: true, force: true });
     }
   } finally {
-    await preview.close();
+    await closePreview(preview);
   }
 }
 
