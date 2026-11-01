@@ -10,7 +10,7 @@ While using react in a professional context, I realized that it was lacking the 
 
 ## Requirements
 + **node** >= 18
-+ **vite** >= 5, or **rollup** >= 4, or **rolldown** >= 1
++ **vite** >= 2, or **rollup** >= 4, or **rolldown** >= 1
 
 ## How to install
 
@@ -375,8 +375,8 @@ npm test
 The e2e harness packs the plugin with `npm pack`, installs it into isolated
 projects, then drives a real browser against each setup:
 
-- **Vite 5, 6, 7, and 8** — the dev server and a production build served with
-  `vite preview`.
+- **Vite 2, 3, 4, 5, 6, 7, and 8** — the dev server and a production build
+  served with `vite preview`.
 - **Rollup** — a production build using `@rollup/plugin-babel`, the CSS bridge
   documented above, and the bundled React runtime, served by a static Node
   server.
@@ -423,10 +423,11 @@ The harness asserts that:
   `SOURCEMAP_BROKEN` warnings.
 
 All installs are cached in `e2e/.cache/`; the cache key includes the packed
-plugin, so plugin changes trigger a reinstall. Vite 8 uses Rolldown rather than
-Rollup; `rollup` is installed in the Vite projects only to satisfy this
-package's peer dependency. The `e2e` CI job runs `npm run test:e2e`, covering
-all three bundlers.
+plugin, so plugin changes trigger a reinstall. Each Vite major uses the
+`@vitejs/plugin-react` release that still declares it as a peer. Vite 8 uses
+Rolldown rather than Rollup; `rollup` is installed in the Vite projects only to
+satisfy this package's peer dependency. The `e2e` CI job runs
+`npm run test:e2e`, covering all three bundlers.
 
 ## Contributing
 Anyone is free to open a PR and contribute to this project... just be civilized!
