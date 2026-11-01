@@ -5,10 +5,10 @@ are welcome — bug reports, documentation fixes, new test cases, and code.
 
 ## Code of Conduct
 
-Be civil and constructive in issues, pull requests, and reviews. Disagreement
-about technical decisions is fine; personal attacks, harassment, and abusive
-behavior are not. Maintainers may edit or remove comments and close
-contributions that do not meet this standard.
+This project follows the [Contributor Covenant](CODE_OF_CONDUCT.md). By
+participating, you are expected to uphold it. Disagreement about technical
+decisions is fine; personal attacks, harassment, and abusive behavior are not.
+Report unacceptable behavior through the channels listed in the policy.
 
 Anyone is free to open a PR and contribute to this project... just be civilized!
 

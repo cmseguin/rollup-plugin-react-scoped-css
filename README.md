@@ -3,6 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/rollup-plugin-react-scoped-css.svg?style=flat-square)](https://www.npmjs.com/package/rollup-plugin-react-scoped-css)
 [![npm downloads](https://img.shields.io/npm/dm/rollup-plugin-react-scoped-css.svg?style=flat-square)](https://www.npmjs.com/package/rollup-plugin-react-scoped-css)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?style=flat-square)](CODE_OF_CONDUCT.md)
 
 ## Motivations
 While using react in a professional context, I realized that it was lacking the scoped css feature that I learned to love from Vue and Angular. After some research I came across good plugins, but sadly were not compatible with vite and/or rollup. Thus, I decided to create this plugin.
